@@ -210,11 +210,15 @@ endif()
 
 if(BUILD_TESTS)
     # GoogleTest - 单元测试（阶段五）
+    # 禁用 gtest 的测试和示例，避免冲突
+    set(INSTALL_GTEST OFF CACHE BOOL "Disable installation of googletest")
+    set(gtest_build_samples OFF CACHE BOOL "Disable building gtest samples")
+    set(gtest_build_tests OFF CACHE BOOL "Disable building gtest tests")
+    
     FetchContent_Declare(
         googletest
         GIT_REPOSITORY https://github.com/google/googletest.git
         GIT_TAG        v1.14.0
-        FIND_PACKAGE_ARGS
     )
     # For Windows: Prevent overriding the parent project's compiler/linker settings
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
