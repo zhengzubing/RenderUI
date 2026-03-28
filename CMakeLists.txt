@@ -1,4 +1,14 @@
 cmake_minimum_required(VERSION 3.20)
+
+# 设置 CMake 策略以兼容旧版本依赖
+if(POLICY CMP0048)
+    cmake_policy(SET CMP0048 NEW)
+endif()
+if(POLICY CMP0077)
+    cmake_policy(SET CMP0077 NEW)
+endif()
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+
 project(RenderUI 
     VERSION 0.1.0 
     DESCRIPTION "Modern UI Widget Rendering Framework"

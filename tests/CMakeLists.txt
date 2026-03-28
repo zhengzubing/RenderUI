@@ -9,6 +9,9 @@ add_executable(renderui_tests
     test_layout.cpp
     test_event.cpp
     test_resource.cpp
+    test_video_stream.cpp
+    test_model3d.cpp
+    test_dbus.cpp
 )
 
 target_link_libraries(renderui_tests
