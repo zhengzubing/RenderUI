@@ -55,7 +55,7 @@ FetchContent_MakeAvailable(magic_enum)
 FetchContent_Declare(
     tinyobjloader
     GIT_REPOSITORY https://github.com/tinyobjloader/tinyobjloader.git
-    GIT_TAG        v2.0.0-rc13
+    GIT_TAG        v2.0.0rc13
 )
 FetchContent_MakeAvailable(tinyobjloader)
 
