@@ -1,0 +1,119 @@
+@startuml RenderUI 模块依赖图
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+
+package "core" {
+  [Application]
+  [EventLoop]
+  [Logger]
+  [ApplicationContext]
+}
+
+package "window" {
+  [WindowManager]
+  [Window]
+  [Surface]
+  [EglContext]
+}
+
+package "widget" {
+  [Widget]
+  [WidgetTree]
+  [TouchEvent]
+  [KeyEvent]
+  
+  package "widgets" {
+    [Button]
+    [Label]
+    [ImageView]
+    [VideoStream]
+    [Model3D]
+    [Container]
+  }
+}
+
+package "layout" {
+  [LayoutEngine]
+  [FlexLayout]
+  [AbsoluteLayout]
+}
+
+package "render" {
+  [RenderPass]
+  [CairoRenderer]
+  [GlRenderer]
+  [TextureCache]
+  [PboPool]
+}
+
+package "resource" {
+  [ResourceManager]
+  [ImageLoader]
+  [ModelLoader]
+}
+
+package "data" {
+  [Storage]
+  [Settings]
+}
+
+package "ipc" {
+  [DBusAdapter]
+  [CanSignal]
+}
+
+package "utils" {
+  [JsonParser]
+  [Timer]
+  [ThreadPool]
+}
+
+' 依赖关系
+Application --> EventLoop
+Application --> ApplicationContext
+Application --> WindowManager
+Application --> WidgetTree
+
+WindowManager --> Window
+WindowManager --> EglContext
+Window --> Surface
+
+WidgetTree --> Widget
+WidgetTree --> LayoutEngine
+WidgetTree --> TouchEvent
+
+Widget <|-- Button
+Widget <|-- Label
+Widget <|-- ImageView
+Widget <|-- VideoStream
+Widget <|-- Model3D
+
+LayoutEngine --> FlexLayout
+LayoutEngine --> AbsoluteLayout
+
+Widget --> RenderPass
+VideoStream --> GlRenderer
+Label --> CairoRenderer
+Model3D --> GlRenderer
+
+GlRenderer --> TextureCache
+GlRenderer --> PboPool
+CairoRenderer --> TextureCache
+
+ResourceManager --> ImageLoader
+ResourceManager --> ModelLoader
+
+ImageButton --> ResourceManager
+Model3D --> ResourceManager
+
+Widget --> Storage
+Settings --> Storage
+
+WidgetTree --> JsonParser
+Application --> DBusAdapter
+DBusAdapter --> CanSignal
+
+EventLoop --> Timer
+EventLoop --> ThreadPool
+
+@enduml

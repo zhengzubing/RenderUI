@@ -1,0 +1,52 @@
+@startuml RenderUI 系统架构分层
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+skinparam rectangle {
+  BackgroundColor<<Layer>> LightBlue
+  BorderColor Black
+}
+
+rectangle "RenderUI 系统架构" {
+  
+  rectangle "<b>Application Layer</b>\n应用层\n===== \n• Demo 业务逻辑\n• 视图切换管理\n• 数据绑定" as App <<Layer>>
+  
+  rectangle "<b>Widget Layer</b>\n控件层\n=====\n• Scene Graph 控件树\n• 属性系统\n• 事件处理器\n• 信号槽机制" as Widget <<Layer>>
+  
+  rectangle "<b>Layout Engine</b>\n布局引擎\n=====\n• Flexbox 弹性布局\n• 绝对定位\n• 约束布局\n• 百分比布局" as Layout <<Layer>>
+  
+  rectangle "<b>Render Backend</b>\n渲染后端\n=====\n• Cairo Renderer (阶段一)\n• Skia Renderer (阶段四)\n• OpenGL Renderer\n• 3D Model Renderer\n• 纹理缓存/PBO" as Render <<Layer>>
+  
+  rectangle "<b>Window System</b>\n窗口系统\n=====\n• Wayland Client\n• EGL 上下文管理\n• Surface 管理\n• Input 事件采集" as Window <<Layer>>
+  
+  rectangle "<b>Platform Layer</b>\n平台层\n=====\n• Linux Kernel\n• ARM64 架构\n• DRM/KMS 显示\n• Input 子系统\n• DBus IPC" as Platform <<Layer>>
+}
+
+App -down-> Widget : 使用
+Widget -down-> Layout : 计算布局
+Widget -down-> Render : 渲染请求
+Render -down-> Window : 提交显示
+Window -down-> Platform : 系统调用
+
+note right of App
+  示例：车载 360 影像 Demo
+  - 视图切换逻辑
+  - CAN 信号处理
+  - 用户交互
+end note
+
+note right of Widget
+  核心类：
+  - Widget (基类)
+  - Button, Label, ImageView
+  - VideoStream (每帧渲染)
+  - Model3D (3D 模型)
+end note
+
+note right of Render
+  渲染策略：
+  - 静态控件：按需渲染
+  - 视频流：每帧渲染
+  - 双层 FBO 合成
+end note
+
+@enduml

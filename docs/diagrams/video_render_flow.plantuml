@@ -1,0 +1,50 @@
+@startuml 视频流每帧渲染流程
+skinparam backgroundColor #FEFECE
+
+participant "Camera/\n视频源" as Source
+participant "VideoStream\n控件" as Video
+participant "YUV→RGB\nShader" as Shader
+participant "OpenGL\nRenderer" as GL
+participant "EGL/Wayland" as EGL
+participant "Weston" as Weston
+
+== 视频流实时渲染流程 (60fps) ==
+
+loop 每一帧
+    Source -> Video: pushFrame()\nYUV 数据
+    activate Video
+    Video -> Video: 双缓冲切换\nping-pong buffer
+    
+    alt 使用 PBO 异步上传 (阶段四)
+        Video -> GL: glBindBuffer()\n异步上传
+        activate GL
+        GL --> Video: 立即返回\n不阻塞
+    else CPU 直接上传 (阶段一/二)
+        Video -> GL: glTexImage2D()\n同步上传
+        activate GL
+    end
+    
+    GL -> Shader: 激活 Fragment Shader\nYUV 采样转换
+    activate Shader
+    Shader -> Shader: GPU 并行\nYUV→RGB 转换
+    Shader --> GL: 转换完成
+    deactivate Shader
+    
+    GL -> GL: 渲染到屏幕\n绘制全屏 quad
+    GL -> EGL: eglSwapBuffers()
+    activate EGL
+    EGL -> EGL: 交换前后缓冲
+    EGL -> Weston: wl_surface_commit()
+    activate Weston
+    Weston -> Weston: 与其他图层合成\n显示到屏幕
+    deactivate Weston
+    EGL --> GL: 完成
+    deactivate EGL
+    GL --> Video: 帧渲染完成
+    deactivate GL
+    deactivate Video
+    
+    note right: 目标：16ms 内完成一帧
+end
+
+@enduml

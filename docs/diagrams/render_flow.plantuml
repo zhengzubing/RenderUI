@@ -1,0 +1,51 @@
+@startuml RenderUI 渲染流程图
+skinparam backgroundColor #EEEBDC
+skinparam sequenceMessageAlign center
+
+participant "应用层\nApplication" as App
+participant "控件树\nWidgetTree" as Tree
+participant "布局引擎\nLayoutEngine" as Layout
+participant "Cairo 渲染器\nCairoRenderer" as Cairo
+participant "OpenGL\nRenderer" as GL
+participant "EGL/Wayland" as EGL
+participant "Weston\n合成器" as Weston
+
+== 静态控件按需渲染流程 ==
+
+App -> Tree: 更新属性\nsetPosition/setSize
+activate Tree
+Tree -> Tree: 标记脏区域\nmarkDirty()
+Tree -> Layout: 重新计算布局\ncalculateLayout()
+activate Layout
+Layout --> Tree: 布局完成
+deactivate Layout
+Tree --> App: 更新完成
+deactivate Tree
+
+... 经过一段时间 ...
+
+App -> Tree: 触发渲染\nrequestRender()
+activate Tree
+Tree -> Cairo: renderDirtyRegions()
+activate Cairo
+Cairo -> Cairo: 绘制脏区域\ncairo_paint()
+Cairo -> GL: glTexSubImage2D()\n上传纹理
+activate GL
+GL -> GL: 绑定 FBO\nbindFramebuffer()
+GL -> GL: 绘制四边形\ndrawArrays()
+GL -> EGL: eglSwapBuffers()
+activate EGL
+EGL -> Weston: wl_surface_commit()
+activate Weston
+Weston -> Weston: 合成显示
+deactivate Weston
+EGL --> GL: 完成
+deactivate EGL
+GL --> Cairo: 完成
+deactivate GL
+Cairo --> Tree: 渲染完成
+deactivate Cairo
+Tree --> App: 帧完成
+deactivate Tree
+
+@enduml
