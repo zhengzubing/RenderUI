@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  renderui-dev:
+    build: .
+    container_name: renderui-dev
+    volumes:
+      # 挂载项目目录
+      - .:/workspace/RenderUI
+      # 缓存构建产物
+      - renderui-build-cache:/workspace/RenderUI/build
+      # 缓存 CMake 和 FetchContent 下载
+      - cmake-cache:/root/.cache
+    working_dir: /workspace/RenderUI
+    command: /bin/bash
+    # 如果需要 GUI 支持，取消下面的注释
+    # network_mode: host
+    # environment:
+    #   - DISPLAY=$DISPLAY
+    # volumes:
+    #   - /tmp/.X11-unix:/tmp/.X11-unix
+
+volumes:
+  renderui-build-cache:
+  cmake-cache:
