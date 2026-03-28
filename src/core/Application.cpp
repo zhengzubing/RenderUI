@@ -6,6 +6,7 @@
 #include "Component/RenderContext.hpp"
 #include "Component/ResourceManager.hpp"
 #include "Component/DebugMenu.hpp"
+#include "Component/EventDispatcher.hpp"
 #include <thread>
 #include <chrono>
 
@@ -47,6 +48,9 @@ bool Application::init(const std::string& title, int width, int height) {
     
     // 初始化事件循环
     EventLoop::instance().init();
+    
+    // 初始化事件分发器
+    EventDispatcher::instance().init();
     
     // 创建主窗口
     impl_->window = WindowManager::instance().createMainWindow(title, width, height);
