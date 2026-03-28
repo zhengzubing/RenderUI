@@ -2,7 +2,7 @@ name: CI Build Test
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, ai-development ]
   pull_request:
     branches: [ main ]
 
