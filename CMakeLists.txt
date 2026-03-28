@@ -200,6 +200,10 @@ target_compile_options(RenderUICore PRIVATE
 # 示例程序
 # ============================================================================
 
+# 暂时禁用示例构建，避免目录不存在错误
+# TODO: 创建示例程序后启用
+set(BUILD_EXAMPLES OFF CACHE BOOL "Build examples" FORCE)
+
 if(BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
