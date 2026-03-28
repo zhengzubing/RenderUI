@@ -4,6 +4,8 @@
 #include "Component/EventLoop.hpp"
 #include "Component/ApplicationContext.hpp"
 #include "Component/RenderContext.hpp"
+#include "Component/ResourceManager.hpp"
+#include "Component/DebugMenu.hpp"
 #include <thread>
 #include <chrono>
 
@@ -36,6 +38,12 @@ bool Application::init(const std::string& title, int width, int height) {
     
     // 初始化应用上下文
     ApplicationContext::instance().init();
+    
+    // 初始化资源管理器
+    ResourceManager::instance().init("./assets");
+    
+    // 初始化调试菜单
+    DebugMenu::instance().init();
     
     // 初始化事件循环
     EventLoop::instance().init();
@@ -82,7 +90,8 @@ int Application::run() {
         // 开始渲染
         impl_->renderContext.beginFrame();
         
-        // TODO: 渲染控件树
+        // 渲染调试信息（FPS 等）
+        DebugMenu::instance().render();
         
         // 结束渲染（交换缓冲区）
         impl_->renderContext.endFrame();
