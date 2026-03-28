@@ -214,11 +214,20 @@ if(BUILD_TESTS)
         googletest
         GIT_REPOSITORY https://github.com/google/googletest.git
         GIT_TAG        v1.14.0
+        FIND_PACKAGE_ARGS
     )
+    # For Windows: Prevent overriding the parent project's compiler/linker settings
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(googletest)
     
     enable_testing()
-    add_subdirectory(tests)
+    
+    # 检查 tests 目录是否存在，如果存在则添加
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+        add_subdirectory(tests)
+    else()
+        message(STATUS "Tests directory not found, skipping test build")
+    endif()
 endif()
 
 # ============================================================================
