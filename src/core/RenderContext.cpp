@@ -1,6 +1,7 @@
 #include "Component/RenderContext.hpp"
 #include "Component/Logger.hpp"
 #include <cstring>
+#include <cmath>
 
 namespace Component {
 

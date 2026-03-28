@@ -86,8 +86,8 @@ EGLSurface EglContext::createSurface(void* nativeWindow, int width, int height) 
         EGL_NONE
     };
     
-    EGLSurface surface = eglCreatePlatformWindowSurfaceEXT(
-        display_, config_, nativeWindow, surfaceAttribs);
+    EGLSurface surface = eglCreateWindowSurface(
+        display_, config_, (EGLNativeWindowType)nativeWindow, surfaceAttribs);
     
     if (surface == EGL_NO_SURFACE) {
         LOG_ERROR("Failed to create EGL surface");
