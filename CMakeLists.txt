@@ -77,13 +77,13 @@ FetchContent_Populate(stb)
 # stb 是单头文件库，直接包含路径
 include_directories(${stb_SOURCE_DIR})
 
-# 7. sigslot - 信号槽机制 (轻量级 C++14 实现)
+# 7. signals - 信号槽机制 (轻量级 C++14 实现)
 FetchContent_Declare(
-    sigslot
-    GIT_REPOSITORY https://github.com/palacaze/sigslot.git
-    GIT_TAG        v1.0.0
+    signals
+    GIT_REPOSITORY https://github.com/vdksoft/signals
+    GIT_TAG        master
 )
-FetchContent_MakeAvailable(sigslot)
+FetchContent_MakeAvailable(signals)
 
 # 8. Cairo - 2D 绘图（阶段一至三）
 find_package(PkgConfig REQUIRED)
