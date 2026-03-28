@@ -78,12 +78,18 @@ FetchContent_Populate(stb)
 include_directories(${stb_SOURCE_DIR})
 
 # 7. signals - 信号槽机制 (轻量级 C++14 实现)
+# 这是一个 header-only 库，只需要包含头文件路径
 FetchContent_Declare(
     signals
     GIT_REPOSITORY https://github.com/vdksoft/signals
     GIT_TAG        master
 )
-FetchContent_MakeAvailable(signals)
+FetchContent_GetProperties(signals)
+if(NOT signals_POPULATED)
+    FetchContent_Populate(signals)
+endif()
+# 添加头文件路径
+include_directories(${signals_SOURCE_DIR})
 
 # 8. Cairo - 2D 绘图（阶段一至三）
 find_package(PkgConfig REQUIRED)
