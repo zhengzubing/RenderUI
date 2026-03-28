@@ -44,10 +44,13 @@ public:
     
 private:
     Application() = default;
-    ~Application() = default;
     
     struct Impl;
     std::unique_ptr<Impl> impl_;
+    
+public:
+    // 允许 shared_ptr 正确销毁对象
+    ~Application() = default;
 };
 
 } // namespace Component
