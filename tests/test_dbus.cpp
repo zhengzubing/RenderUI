@@ -4,7 +4,7 @@
 #include <thread>
 #include <chrono>
 
-using namespace RenderUI;
+using namespace Component;
 
 /**
  * @brief DBus 和 CAN 信号测试

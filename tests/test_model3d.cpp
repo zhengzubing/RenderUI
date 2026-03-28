@@ -3,7 +3,7 @@
 #include "Component/Types.hpp"
 #include <cmath>
 
-using namespace RenderUI;
+using namespace Component;
 
 /**
  * @brief Model3D 三维模型控件测试

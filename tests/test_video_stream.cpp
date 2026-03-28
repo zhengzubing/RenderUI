@@ -4,7 +4,7 @@
 #include <thread>
 #include <chrono>
 
-using namespace RenderUI;
+using namespace Component;
 
 /**
  * @brief VideoStream 视频流控件测试
@@ -15,7 +15,8 @@ using namespace RenderUI;
 TEST(VideoStreamTest, CreateAndDestroy) {
     auto stream = std::make_shared<VideoStream>("test_stream");
     EXPECT_NE(stream, nullptr);
-    EXPECT_EQ(stream->getName(), "test_stream");
+    // VideoStream 构造函数接受 source 参数，使用 getSource 检查
+    EXPECT_EQ(stream->getSource(), "test_stream");
     
     // 默认状态检查
     EXPECT_FALSE(stream->isPlaying());
