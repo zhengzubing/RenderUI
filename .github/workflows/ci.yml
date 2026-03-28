@@ -1,0 +1,97 @@
+name: CI Build Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-ubuntu:
+    name: Build on Ubuntu
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          cmake \
+          ninja-build \
+          pkg-config \
+          libwayland-dev \
+          wayland-protocols \
+          libcairo2-dev \
+          libgles2-mesa-dev \
+          libegl1-mesa-dev \
+          libdbus-1-dev \
+          libxkbcommon-dev
+    
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+          -DBUILD_EXAMPLES=ON \
+          -DBUILD_TESTS=ON
+    
+    - name: Build
+      run: |
+        cd build
+        ninja -j$(nproc)
+    
+    - name: Verify build artifacts
+      run: |
+        echo "Checking build artifacts..."
+        ls -la build/lib/
+        ls -la build/bin/
+        
+        # 检查库文件是否存在
+        test -f build/lib/libRenderUICore.a && echo "✓ Static library created"
+        
+        # 检查可执行文件（如果有）
+        if [ -f build/bin/renderui_demo ]; then
+          echo "✓ Demo executable created"
+          file build/bin/renderui_demo
+        fi
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: renderui-linux-build
+        path: |
+          build/lib/*.a
+          build/bin/*
+        retention-days: 7
+
+  build-docker:
+    name: Build Docker Image
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Build Docker image
+      run: |
+        docker build -t renderui-dev:latest .
+    
+    - name: Test build in Docker
+      run: |
+        docker run --rm \
+          -v $(pwd):/workspace/RenderUI \
+          renderui-dev:latest \
+          bash -c "cd /workspace/RenderUI && ./build.sh"
+    
+    - name: Verify Docker build
+      run: |
+        docker run --rm \
+          -v $(pwd):/workspace/RenderUI \
+          renderui-dev:latest \
+          bash -c "ls -la /workspace/RenderUI/build/lib/"
