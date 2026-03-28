@@ -224,9 +224,8 @@ target_link_libraries(renderui_demo PRIVATE RenderUICore)
 # 示例程序
 # ============================================================================
 
-# 暂时禁用示例构建，避免目录不存在错误
-# TODO: 创建示例程序后启用
-set(BUILD_EXAMPLES OFF CACHE BOOL "Build examples" FORCE)
+# 阶段五：启用示例构建
+set(BUILD_EXAMPLES ON CACHE BOOL "Build examples" FORCE)
 
 if(BUILD_EXAMPLES)
     add_subdirectory(examples)
