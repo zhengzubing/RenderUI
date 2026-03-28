@@ -77,7 +77,7 @@ sudo dnf install cmake ninja-build pkg-config \
 #### 方法一：使用构建脚本（推荐）
 
 ```bash
-# 基础构建
+# 基础构建（包含测试和示例）
 ./build.sh
 
 # Debug 模式
@@ -85,6 +85,9 @@ sudo dnf install cmake ninja-build pkg-config \
 
 # 启用 Skia GPU 加速（阶段四）
 ./build.sh --skia
+
+# 启用 Perfetto 性能分析
+./build.sh --perfetto
 
 # 清理构建
 ./build.sh --clean
@@ -95,9 +98,37 @@ sudo dnf install cmake ninja-build pkg-config \
 ```bash
 mkdir build && cd build
 
-cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
+# 完整构建（包含测试和示例）
+cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON
 
 ninja
+```
+
+#### 运行测试
+
+```bash
+# 运行所有测试
+cd build && ctest
+
+# 运行特定测试套件
+./bin/tests/renderui_tests --gtest_filter="WidgetTest.*"
+
+# 生成测试覆盖率报告
+cmake -DCMAKE_CXX_FLAGS="--coverage" ..
+ninja
+ctest
+lcov --capture --directory . --output-file coverage.info
+genhtml coverage.info --output-directory coverage_report
+```
+
+#### 运行示例程序
+
+```bash
+# 360 车载全景影像 Demo
+./bin/examples/360_camera_demo
+
+# Perfetto 性能分析 Demo（需启用 PERFETTO）
+./bin/examples/perfetto_demo
 ```
 
 ### Docker 开发环境
@@ -152,17 +183,27 @@ RenderUI/
 
 ## 📖 开发阶段
 
-| 阶段 | 主题 | 状态 |
-|------|------|------|
-| 一 | 基础窗口与渲染 | 🟢 进行中 |
-| 二 | 控件系统与布局 | ⚪ 待开始 |
-| 三 | 高级功能（3D/多窗口） | ⚪ 待开始 |
-| 四 | GPU 性能优化 | ⚪ 待开始 |
-| 五 | 工程化与测试 | ⚪ 待开始 |
-| 六 | 可视化工具 | ⚪ 待开始 |
-| 七 | 迭代与维护 | ⚪ 待开始 |
+| 阶段 | 主题 | 状态 | 完成度 |
+|------|------|------|--------|
+| 一 | 基础窗口与渲染 | ✅ 完成 | 100% |
+| 二 | 控件系统与布局 | ✅ 完成 | 100% |
+| 三 | 高级功能（3D/多窗口） | ✅ 完成 | 100% |
+| 四 | GPU 性能优化 | ✅ 完成 | 100% |
+| 五 | 工程化与测试 | ✅ 完成 | 100% |
+| 六 | 可视化工具 | ⚪ 待开始 | 0% |
+| 七 | 迭代与维护 | ⚪ 待开始 | 0% |
 
 详细规划见 [PRD 文档](docs/requirements/PRD.md)
+
+### 阶段五完成情况
+
+- ✅ GoogleTest 单元测试框架（54+ 测试用例）
+- ✅ Perfetto 性能分析工具
+- ✅ clang-format 代码格式化
+- ✅ CI/CD 自动构建和测试
+- ✅ 完整文档（API/测试/构建指南）
+
+详细总结请查看 [阶段五完成报告](docs/stage5_summary.md)
 
 ## 📚 文档
 
