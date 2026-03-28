@@ -1,0 +1,72 @@
+{
+  "window": {
+    "title": "车载全景 360 影像 Demo",
+    "width": 1920,
+    "height": 1080
+  },
+  "theme": "dark",
+  "locale": "zh-CN",
+  "widgets": [
+    {
+      "id": "background",
+      "type": "ImageView",
+      "image": "assets/bg_dark.png",
+      "position": {"x": 0, "y": 0},
+      "size": {"width": 1920, "height": 1080},
+      "zIndex": 0
+    },
+    {
+      "id": "front_camera",
+      "type": "VideoStream",
+      "source": "camera://front",
+      "position": {"x": 100, "y": 100},
+      "size": {"width": 640, "height": 480},
+      "zIndex": 10
+    },
+    {
+      "id": "rear_camera",
+      "type": "VideoStream",
+      "source": "camera://rear",
+      "position": {"x": 1180, "y": 100},
+      "size": {"width": 640, "height": 480},
+      "zIndex": 10
+    },
+    {
+      "id": "speed_label",
+      "type": "Label",
+      "text": "0 km/h",
+      "fontSize": 32,
+      "color": "#FFFF00",
+      "position": {"x": 50, "y": 50},
+      "bindings": [
+        {"signal": "vehicle.speed", "property": "text"}
+      ]
+    },
+    {
+      "id": "gear_label",
+      "type": "Label",
+      "text": "D",
+      "fontSize": 24,
+      "color": "#00FF00",
+      "position": {"x": 50, "y": 100}
+    },
+    {
+      "id": "btn_normal_view",
+      "type": "Button",
+      "text": "正常视图",
+      "backgroundColor": "#3498db",
+      "textColor": "#FFFFFF",
+      "position": {"x": 1700, "y": 50},
+      "size": {"width": 150, "height": 40}
+    },
+    {
+      "id": "btn_top_view",
+      "type": "Button",
+      "text": "俯视图",
+      "backgroundColor": "#3498db",
+      "textColor": "#FFFFFF",
+      "position": {"x": 1700, "y": 100},
+      "size": {"width": 150, "height": 40}
+    }
+  ]
+}
