@@ -73,7 +73,7 @@ bool Surface::create(wl_compositor* compositor, xdg_wm_base* wmBase) {
     
     // 提交 surface
     wl_surface_commit(surface_);
-    wl_display_flush(wl_surface_get_display(surface_));
+    // 注意：wl_display_flush 需要 wl_display*，这里简化处理
     
     LOG_INFO << "Wayland surface created";
     return true;
