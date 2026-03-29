@@ -1,5 +1,5 @@
-#include "Component/CanSignal.hpp"
-#include "Component/Logger.hpp"
+#include "CanSignal.hpp"
+#include "Logger.hpp"
 
 namespace Component {
 

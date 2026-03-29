@@ -1,5 +1,5 @@
-#include "Component/widgets/CheckBox.hpp"
-#include "Component/RenderContext.hpp"
+#include "widgets/CheckBox.hpp"
+#include "RenderContext.hpp"
 
 namespace Component {
 

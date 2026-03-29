@@ -1,5 +1,5 @@
-#include "Component/AsyncTextureUploader.hpp"
-#include "Component/Logger.hpp"
+#include "AsyncTextureUploader.hpp"
+#include "Logger.hpp"
 #include <cstring>
 
 namespace Component {

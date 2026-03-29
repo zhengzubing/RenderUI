@@ -1,4 +1,4 @@
-#include "Component/AbsoluteLayout.hpp"
+#include "AbsoluteLayout.hpp"
 
 namespace Component {
 

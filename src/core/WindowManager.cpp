@@ -1,5 +1,5 @@
-#include "Component/WindowManager.hpp"
-#include "Component/Logger.hpp"
+#include "WindowManager.hpp"
+#include "Logger.hpp"
 
 namespace Component {
 

@@ -1,5 +1,5 @@
-#include "Component/WidgetTree.hpp"
-#include "Component/Logger.hpp"
+#include "WidgetTree.hpp"
+#include "Logger.hpp"
 #include <algorithm>
 
 namespace Component {

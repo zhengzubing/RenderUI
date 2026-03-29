@@ -1,6 +1,6 @@
-#include "Component/VideoStream.hpp"
-#include "Component/RenderContext.hpp"
-#include "Component/Logger.hpp"
+#include "VideoStream.hpp"
+#include "RenderContext.hpp"
+#include "Logger.hpp"
 #include <GLES2/gl2.h>
 #include <cstring>
 #include <chrono>

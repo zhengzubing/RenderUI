@@ -1,6 +1,6 @@
-#include "Component/widgets/ImageView.hpp"
-#include "Component/RenderContext.hpp"
-#include "Component/ResourceManager.hpp"
+#include "widgets/ImageView.hpp"
+#include "RenderContext.hpp"
+#include "ResourceManager.hpp"
 
 namespace Component {
 

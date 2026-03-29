@@ -1,7 +1,7 @@
 /* GTEST DISABLED - src/test_video_stream.cpp */
 // #include <gtest/gtest.h>
-#include "Component/VideoStream.hpp"
-#include "Component/Types.hpp"
+#include "VideoStream.hpp"
+#include "Types.hpp"
 #include <thread>
 #include <chrono>
 

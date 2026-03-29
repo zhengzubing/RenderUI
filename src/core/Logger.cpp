@@ -1,4 +1,4 @@
-#include "Component/Logger.hpp"
+#include "Logger.hpp"
 
 namespace Component {
 

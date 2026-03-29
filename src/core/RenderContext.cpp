@@ -1,5 +1,5 @@
-#include "Component/RenderContext.hpp"
-#include "Component/Logger.hpp"
+#include "RenderContext.hpp"
+#include "Logger.hpp"
 #include <cstring>
 #include <cmath>
 

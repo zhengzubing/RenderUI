@@ -1,12 +1,12 @@
-#include "Component/Application.hpp"
-#include "Component/Logger.hpp"
-#include "Component/WindowManager.hpp"
-#include "Component/EventLoop.hpp"
-#include "Component/ApplicationContext.hpp"
-#include "Component/RenderContext.hpp"
-#include "Component/ResourceManager.hpp"
-#include "Component/DebugMenu.hpp"
-#include "Component/EventDispatcher.hpp"
+#include "Application.hpp"
+#include "Logger.hpp"
+#include "WindowManager.hpp"
+#include "EventLoop.hpp"
+#include "ApplicationContext.hpp"
+#include "RenderContext.hpp"
+#include "ResourceManager.hpp"
+#include "DebugMenu.hpp"
+#include "EventDispatcher.hpp"
 #include <thread>
 #include <chrono>
 

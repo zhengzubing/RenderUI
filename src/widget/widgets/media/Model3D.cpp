@@ -1,7 +1,7 @@
-#include "Component/Model3D.hpp"
-#include "Component/RenderContext.hpp"
-#include "Component/Logger.hpp"
-#include "Component/ResourceManager.hpp"
+#include "Model3D.hpp"
+#include "RenderContext.hpp"
+#include "Logger.hpp"
+#include "ResourceManager.hpp"
 #include <GLES2/gl2.h>
 #include <tiny_obj_loader.h>
 #include <cstring>

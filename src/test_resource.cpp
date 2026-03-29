@@ -5,8 +5,8 @@
  */
 
 // #include <gtest/gtest.h>
-#include "Component/ResourceManager.hpp"
-#include "Component/ImageLoader.hpp"
+#include "ResourceManager.hpp"
+#include "ImageLoader.hpp"
 
 using namespace Component;
 

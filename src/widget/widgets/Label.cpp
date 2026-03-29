@@ -1,5 +1,5 @@
-#include "Component/widgets/Label.hpp"
-#include "Component/RenderContext.hpp"
+#include "widgets/Label.hpp"
+#include "RenderContext.hpp"
 
 namespace Component {
 

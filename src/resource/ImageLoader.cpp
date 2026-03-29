@@ -1,5 +1,5 @@
-#include "Component/ImageLoader.hpp"
-#include "Component/Logger.hpp"
+#include "ImageLoader.hpp"
+#include "Logger.hpp"
 #include <stb_image.h>
 #include <cstring>
 

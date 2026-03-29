@@ -1,5 +1,5 @@
-#include "Component/DBusAdapter.hpp"
-#include "Component/Logger.hpp"
+#include "DBusAdapter.hpp"
+#include "Logger.hpp"
 #include <gio/gio.h>
 #include <cstring>
 

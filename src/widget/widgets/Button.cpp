@@ -1,5 +1,5 @@
-#include "Component/widgets/Button.hpp"
-#include "Component/RenderContext.hpp"
+#include "widgets/Button.hpp"
+#include "RenderContext.hpp"
 
 namespace Component {
 

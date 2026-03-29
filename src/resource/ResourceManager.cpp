@@ -1,5 +1,5 @@
-#include "Component/ResourceManager.hpp"
-#include "Component/Logger.hpp"
+#include "ResourceManager.hpp"
+#include "Logger.hpp"
 #include <stb_image.h>
 
 namespace Component {

@@ -5,8 +5,8 @@
  */
 
 // #include <gtest/gtest.h>
-#include "Component/Widget.hpp"
-#include "Component/Types.hpp"
+#include "Widget.hpp"
+#include "Types.hpp"
 
 using namespace Component;
 

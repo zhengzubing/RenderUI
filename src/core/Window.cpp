@@ -1,5 +1,5 @@
-#include "Component/Window.hpp"
-#include "Component/Logger.hpp"
+#include "Window.hpp"
+#include "Logger.hpp"
 #include <cstring>
 
 namespace Component {

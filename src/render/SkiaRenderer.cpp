@@ -1,5 +1,5 @@
-#include "Component/SkiaRenderer.hpp"
-#include "Component/Logger.hpp"
+#include "SkiaRenderer.hpp"
+#include "Logger.hpp"
 
 #ifdef RENDERUI_USE_SKIA
 

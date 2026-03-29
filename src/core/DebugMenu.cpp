@@ -1,7 +1,7 @@
-#include "Component/DebugMenu.hpp"
-#include "Component/Logger.hpp"
-#include "Component/ApplicationContext.hpp"
-#include "Component/ResourceManager.hpp"
+#include "DebugMenu.hpp"
+#include "Logger.hpp"
+#include "ApplicationContext.hpp"
+#include "ResourceManager.hpp"
 #include <sstream>
 #include <iomanip>
 

@@ -1,5 +1,5 @@
-#include "Component/EventLoop.hpp"
-#include "Component/Logger.hpp"
+#include "EventLoop.hpp"
+#include "Logger.hpp"
 #include <chrono>
 #include <map>
 

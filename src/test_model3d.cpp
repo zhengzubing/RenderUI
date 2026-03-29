@@ -1,7 +1,7 @@
 /* GTEST DISABLED - src/test_model3d.cpp */
 // #include <gtest/gtest.h>
-#include "Component/Model3D.hpp"
-#include "Component/Types.hpp"
+#include "Model3D.hpp"
+#include "Types.hpp"
 #include <cmath>
 
 using namespace Component;

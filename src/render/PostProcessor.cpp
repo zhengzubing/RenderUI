@@ -1,5 +1,5 @@
-#include "Component/PostProcessor.hpp"
-#include "Component/Logger.hpp"
+#include "PostProcessor.hpp"
+#include "Logger.hpp"
 
 namespace Component {
 

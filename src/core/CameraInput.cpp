@@ -1,5 +1,5 @@
-#include "Component/CameraInput.hpp"
-#include "Component/Logger.hpp"
+#include "CameraInput.hpp"
+#include "Logger.hpp"
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>

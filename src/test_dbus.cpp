@@ -1,7 +1,7 @@
 /* GTEST DISABLED - src/test_dbus.cpp */
 // #include <gtest/gtest.h>
-#include "Component/DBusAdapter.hpp"
-#include "Component/CanSignal.hpp"
+#include "DBusAdapter.hpp"
+#include "CanSignal.hpp"
 #include <thread>
 #include <chrono>
 

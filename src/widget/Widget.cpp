@@ -1,5 +1,5 @@
-#include "Component/Widget.hpp"
-#include "Component/RenderContext.hpp"
+#include "Widget.hpp"
+#include "RenderContext.hpp"
 #include <algorithm>
 
 namespace Component {

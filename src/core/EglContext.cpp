@@ -1,5 +1,5 @@
-#include "Component/EglContext.hpp"
-#include "Component/Logger.hpp"
+#include "EglContext.hpp"
+#include "Logger.hpp"
 
 namespace Component {
 

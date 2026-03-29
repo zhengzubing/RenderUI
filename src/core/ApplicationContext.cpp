@@ -1,5 +1,5 @@
-#include "Component/ApplicationContext.hpp"
-#include "Component/Logger.hpp"
+#include "ApplicationContext.hpp"
+#include "Logger.hpp"
 #include <chrono>
 #include <cstdlib>
 #include <sys/time.h>

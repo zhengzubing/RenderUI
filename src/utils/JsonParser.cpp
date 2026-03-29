@@ -1,9 +1,9 @@
-#include "Component/JsonParser.hpp"
-#include "Component/WidgetTree.hpp"
-#include "Component/widgets/Label.hpp"
-#include "Component/widgets/Button.hpp"
-#include "Component/widgets/ImageView.hpp"
-#include "Component/Logger.hpp"
+#include "JsonParser.hpp"
+#include "WidgetTree.hpp"
+#include "widgets/Label.hpp"
+#include "widgets/Button.hpp"
+#include "widgets/ImageView.hpp"
+#include "Logger.hpp"
 #include <fstream>
 
 namespace Component {

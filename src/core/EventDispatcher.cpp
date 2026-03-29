@@ -1,5 +1,5 @@
-#include "Component/EventDispatcher.hpp"
-#include "Component/Logger.hpp"
+#include "EventDispatcher.hpp"
+#include "Logger.hpp"
 
 namespace Component {
 

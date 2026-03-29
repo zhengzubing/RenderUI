@@ -1,5 +1,5 @@
-#include "Component/Surface.hpp"
-#include "Component/Logger.hpp"
+#include "Surface.hpp"
+#include "Logger.hpp"
 
 namespace Component {
 

@@ -5,8 +5,8 @@
  */
 
 // #include <gtest/gtest.h>
-#include "Component/EventLoop.hpp"
-#include "Component/EventDispatcher.hpp"
+#include "EventLoop.hpp"
+#include "EventDispatcher.hpp"
 
 using namespace Component;
 

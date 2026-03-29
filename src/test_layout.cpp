@@ -5,9 +5,9 @@
  */
 
 // #include <gtest/gtest.h>
-#include "Component/AbsoluteLayout.hpp"
-#include "Component/FlexLayout.hpp"
-#include "Component/Widget.hpp"
+#include "AbsoluteLayout.hpp"
+#include "FlexLayout.hpp"
+#include "Widget.hpp"
 
 using namespace Component;
 

@@ -1,5 +1,5 @@
-#include "Component/PboPool.hpp"
-#include "Component/Logger.hpp"
+#include "PboPool.hpp"
+#include "Logger.hpp"
 
 namespace Component {
 
