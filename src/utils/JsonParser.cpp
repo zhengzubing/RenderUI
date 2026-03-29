@@ -1,8 +1,8 @@
 #include "JsonParser.hpp"
 #include "WidgetTree.hpp"
-#include "widgets/Label.hpp"
-#include "widgets/Button.hpp"
-#include "widgets/ImageView.hpp"
+#include "widget/widgets/Label.hpp"
+#include "widget/widgets/Button.hpp"
+#include "widget/widgets/ImageView.hpp"
 #include "Logger.hpp"
 #include <fstream>
 
