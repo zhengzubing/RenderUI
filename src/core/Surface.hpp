@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wayland-client.h>
+#include <xdg-shell-client-protocol.h>
 #include <string>
 
 namespace Component {

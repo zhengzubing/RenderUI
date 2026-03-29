@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Surface.hpp"
 #include "Window.hpp"
 #include <memory>
 #include <vector>

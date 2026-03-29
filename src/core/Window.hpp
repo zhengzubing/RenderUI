@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Types.hpp"
 #include "Surface.hpp"
 #include "EglContext.hpp"
 #include <string>

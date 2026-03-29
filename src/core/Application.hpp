@@ -43,8 +43,6 @@ public:
     void shutdown();
     
 private:
-    Application() = default;
-    
     struct Impl;
     std::unique_ptr<Impl> impl_;
     

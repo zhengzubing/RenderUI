@@ -47,7 +47,23 @@ private:
 
 } // namespace Component
 
-// 便捷宏定义
+// 便捷宏定义（避免与 plog 冲突）
+#ifdef LOG_DEBUG
+#undef LOG_DEBUG
+#endif
+#ifdef LOG_INFO
+#undef LOG_INFO
+#endif
+#ifdef LOG_WARNING
+#undef LOG_WARNING
+#endif
+#ifdef LOG_ERROR
+#undef LOG_ERROR
+#endif
+#ifdef LOG_VERBOSE
+#undef LOG_VERBOSE
+#endif
+
 #define LOG_DEBUG PLOG_DEBUG
 #define LOG_INFO PLOG_INFO
 #define LOG_WARNING PLOG_WARNING

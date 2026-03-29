@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Types.hpp"
 #include <cairo/cairo.h>
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>

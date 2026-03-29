@@ -33,7 +33,8 @@ public:
         std::string format = "YUV420";  // YUV420, NV12, MJPEG
     };
     
-    explicit CameraInput(const Config& config = Config());
+    explicit CameraInput(const Config& config);
+    CameraInput();  // 默认构造函数
     ~CameraInput();
     
     /**

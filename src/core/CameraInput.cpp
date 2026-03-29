@@ -20,6 +20,10 @@ CameraInput::CameraInput(const Config& config) : config_(config) {
     impl_ = std::make_unique<Impl>();
 }
 
+// 默认构造函数
+CameraInput::CameraInput() : CameraInput(Config()) {
+}
+
 CameraInput::~CameraInput() {
     stop();
 }
