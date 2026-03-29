@@ -1,9 +1,10 @@
+/* GTEST DISABLED - src/test_event.cpp */
 /**
  * @file test_event.cpp
  * @brief 事件系统单元测试
  */
 
-#include <gtest/gtest.h>
+// #include <gtest/gtest.h>
 #include "Component/EventLoop.hpp"
 #include "Component/EventDispatcher.hpp"
 

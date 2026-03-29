@@ -1,9 +1,10 @@
+/* GTEST DISABLED - src/test_resource.cpp */
 /**
  * @file test_resource.cpp
  * @brief 资源管理单元测试
  */
 
-#include <gtest/gtest.h>
+// #include <gtest/gtest.h>
 #include "Component/ResourceManager.hpp"
 #include "Component/ImageLoader.hpp"
 

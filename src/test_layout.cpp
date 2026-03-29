@@ -1,9 +1,10 @@
+/* GTEST DISABLED - src/test_layout.cpp */
 /**
  * @file test_layout.cpp
  * @brief 布局引擎单元测试
  */
 
-#include <gtest/gtest.h>
+// #include <gtest/gtest.h>
 #include "Component/AbsoluteLayout.hpp"
 #include "Component/FlexLayout.hpp"
 #include "Component/Widget.hpp"

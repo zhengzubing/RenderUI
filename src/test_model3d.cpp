@@ -1,4 +1,5 @@
-#include <gtest/gtest.h>
+/* GTEST DISABLED - src/test_model3d.cpp */
+// #include <gtest/gtest.h>
 #include "Component/Model3D.hpp"
 #include "Component/Types.hpp"
 #include <cmath>

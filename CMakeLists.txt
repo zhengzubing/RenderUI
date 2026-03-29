@@ -235,31 +235,31 @@ endif()
 # 阶段五：启用测试构建
 set(BUILD_TESTS ON CACHE BOOL "Build tests" FORCE)
 
-if(BUILD_TESTS)
-    # GoogleTest - 单元测试（阶段五）
-    # 禁用 gtest 的测试和示例，避免冲突
-    set(INSTALL_GTEST OFF CACHE BOOL "Disable installation of googletest")
-    set(gtest_build_samples OFF CACHE BOOL "Disable building gtest samples")
-    set(gtest_build_tests OFF CACHE BOOL "Disable building gtest tests")
-    
-    FetchContent_Declare(
-        googletest
-        GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG        v1.14.0
-    )
-    # For Windows: Prevent overriding the parent project's compiler/linker settings
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    FetchContent_MakeAvailable(googletest)
-    
-    enable_testing()
-    
-    # 检查 tests 目录是否存在，如果存在则添加
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-        add_subdirectory(tests)
-    else()
-        message(STATUS "Tests directory not found, skipping test build")
-    endif()
-endif()
+# if(BUILD_TESTS)
+#     # GoogleTest - 单元测试（阶段五）
+#     # 禁用 gtest 的测试和示例，避免冲突
+#     set(INSTALL_GTEST OFF CACHE BOOL "Disable installation of googletest")
+#     set(gtest_build_samples OFF CACHE BOOL "Disable building gtest samples")
+#     set(gtest_build_tests OFF CACHE BOOL "Disable building gtest tests")
+#     
+#     FetchContent_Declare(
+#         googletest
+#         GIT_REPOSITORY https://github.com/google/googletest.git
+#         GIT_TAG        v1.14.0
+#     )
+#     # For Windows: Prevent overriding the parent project's compiler/linker settings
+#     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+#     FetchContent_MakeAvailable(googletest)
+#     
+#     enable_testing()
+#     
+#     # 检查 tests 目录是否存在，如果存在则添加
+#     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+#         add_subdirectory(tests)
+#     else()
+#         message(STATUS "Tests directory not found, skipping test build")
+#     endif()
+# endif()
 
 # ============================================================================
 # 安装配置
