@@ -15,7 +15,7 @@ std::unique_ptr<ImageData> ImageLoader::load(const std::string& path) {
     // 使用 stb_image 加载图片
     unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 4);
     if (!data) {
-        LOG_ERROR("Failed to load image: %s - %s", path.c_str(), stbi_failure_reason());
+        LOG_ERROR << "Failed to load image: " << path << " - " << stbi_failure_reason();
         return nullptr;
     }
     
@@ -57,7 +57,7 @@ cairo_surface_t* ImageLoader::loadToCairoSurface(const std::string& path) {
         CAIRO_FORMAT_ARGB32, imageData->width, imageData->height);
     
     if (!surface) {
-        LOG_ERROR("Failed to create Cairo surface");
+        LOG_ERROR << "Failed to create Cairo surface";
         return nullptr;
     }
     

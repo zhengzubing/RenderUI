@@ -85,12 +85,12 @@ bool Model3D::loadModel(const std::string& path) {
     std::string warn, err;
     
     if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path.c_str())) {
-        LOG_ERROR("Failed to load OBJ model: %s - %s", path.c_str(), err.c_str());
+        LOG_ERROR << "Failed to load OBJ model: " << path << " - " << err;
         return false;
     }
     
     if (!warn.empty()) {
-        LOG_WARNING("OBJ loader warning: %s", warn.c_str());
+        LOG_WARNING << "OBJ loader warning: " << warn;
     }
     
     // 转换顶点数据
@@ -128,8 +128,7 @@ bool Model3D::loadModel(const std::string& path) {
     impl_->loaded = true;
     initOpenGL();
     
-    LOG_INFO("3D model loaded: %s (%zu vertices, %zu indices)", 
-             path.c_str(), modelData_.vertices.size(), modelData_.indices.size());
+    LOG_INFO << "3D model loaded: " << path << " (" << modelData_.vertices.size() << " vertices, " << modelData_.indices.size() << " indices)";
     
     return true;
 }
@@ -157,7 +156,7 @@ bool Model3D::loadTexture(const std::string& path) {
     modelData_.hasTexture = true;
     modelData_.texturePath = path;
     
-    LOG_INFO("3D model texture loaded: %s", path.c_str());
+    LOG_INFO << "3D model texture loaded: " << path;
     return true;
 }
 

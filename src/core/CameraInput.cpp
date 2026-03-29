@@ -42,7 +42,7 @@ bool CameraInput::start() {
     impl_->fd = open(devicePath.c_str(), O_RDWR | O_NONBLOCK, 0);
     
     if (impl_->fd < 0) {
-        LOG_ERROR("Failed to open camera device: %s", devicePath.c_str());
+        LOG_ERROR << "Failed to open camera device: " << devicePath;
         return false;
     }
     
@@ -55,7 +55,7 @@ bool CameraInput::start() {
     fmt.fmt.pix.field = V4L2_FIELD_NONE;
     
     if (ioctl(impl_->fd, VIDIOC_S_FMT, &fmt) < 0) {
-        LOG_ERROR("Failed to set video format");
+        LOG_ERROR << "Failed to set video format";
         close(impl_->fd);
         impl_->fd = -1;
         return false;
@@ -68,7 +68,7 @@ bool CameraInput::start() {
     req.memory = V4L2_MEMORY_MMAP;
     
     if (ioctl(impl_->fd, VIDIOC_REQBUFS, &req) < 0) {
-        LOG_ERROR("Failed to request buffers");
+        LOG_ERROR << "Failed to request buffers";
         close(impl_->fd);
         impl_->fd = -1;
         return false;
@@ -83,7 +83,7 @@ bool CameraInput::start() {
         buf.index = i;
         
         if (ioctl(impl_->fd, VIDIOC_QUERYBUF, &buf) < 0) {
-            LOG_ERROR("Failed to query buffer");
+            LOG_ERROR << "Failed to query buffer";
             close(impl_->fd);
             return false;
         }
@@ -92,7 +92,7 @@ bool CameraInput::start() {
                                   MAP_SHARED, impl_->fd, buf.m.offset);
         
         if (impl_->buffers[i] == MAP_FAILED) {
-            LOG_ERROR("Failed to mmap buffer");
+            LOG_ERROR << "Failed to mmap buffer";
             close(impl_->fd);
             return false;
         }
@@ -106,7 +106,7 @@ bool CameraInput::start() {
         buf.index = i;
         
         if (ioctl(impl_->fd, VIDIOC_QBUF, &buf) < 0) {
-            LOG_ERROR("Failed to queue buffer");
+            LOG_ERROR << "Failed to queue buffer";
             close(impl_->fd);
             return false;
         }
@@ -115,14 +115,14 @@ bool CameraInput::start() {
     // 开始流
     enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     if (ioctl(impl_->fd, VIDIOC_STREAMON, &type) < 0) {
-        LOG_ERROR("Failed to start streaming");
+        LOG_ERROR << "Failed to start streaming";
         close(impl_->fd);
         return false;
     }
     
     running_ = true;
-    LOG_INFO("Camera started: /dev/video%d %dx%d@%dfps", 
-             config_.deviceId, config_.width, config_.height, config_.fps);
+    LOG_INFO << "Camera started: /dev/video" << config_.deviceId << " " 
+             << config_.width << "x" << config_.height << "@" << config_.fps << "fps";
     
     return true;
 }
@@ -152,12 +152,12 @@ void CameraInput::stop() {
     impl_->buffers.clear();
     running_ = false;
     
-    LOG_INFO("Camera stopped");
+    LOG_INFO << "Camera stopped";
 }
 
 void CameraInput::setConfig(const Config& config) {
     if (running_) {
-        LOG_WARNING("Cannot change config while running");
+        LOG_WARNING << "Cannot change config while running";
         return;
     }
     config_ = config;

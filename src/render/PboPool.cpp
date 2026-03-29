@@ -31,7 +31,7 @@ bool PboPool::init() {
         
         // 检查是否成功
         if (glGetError() != GL_NO_ERROR) {
-            LOG_ERROR("Failed to create PBO %d", i);
+            LOG_ERROR << "Failed to create PBO " << i;
             cleanup();
             return false;
         }
@@ -40,8 +40,7 @@ bool PboPool::init() {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     
     initialized_ = true;
-    LOG_INFO("PboPool initialized: %d buffers x %zu bytes", 
-             config_.bufferCount, config_.bufferSize);
+    LOG_INFO << "PboPool initialized: " << config_.bufferCount << " buffers x " << config_.bufferSize << " bytes";
     
     return true;
 }
@@ -64,7 +63,7 @@ int PboPool::acquireBuffer() {
     inUse_[index] = true;
     nextIndex_ = (index + 1) % config_.bufferCount;
     
-    LOG_WARNING("PboPool exhausted, recycling buffer %d", index);
+    LOG_WARNING << "PboPool exhausted, recycling buffer " << index;
     return index;
 }
 
@@ -79,7 +78,7 @@ void* PboPool::mapBuffer(int index) {
     void* ptr = glMapBufferOES(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY_OES);
     
     if (!ptr) {
-        LOG_ERROR("Failed to map PBO %d", index);
+        LOG_ERROR << "Failed to map PBO " << index;
         return nullptr;
     }
     
@@ -156,7 +155,7 @@ void PboPool::cleanup() {
     inUse_.assign(config_.bufferCount, false);
     initialized_ = false;
     
-    LOG_DEBUG("PboPool cleaned up");
+    LOG_DEBUG << "PboPool cleaned up";
 }
 
 } // namespace Component

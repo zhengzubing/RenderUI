@@ -32,20 +32,20 @@ bool RenderContext::init(EGLDisplay display, EGLSurface surface) {
     // 注意：这里简化处理，实际需要使用 cairo_gl_surface_create
     impl_->cairoSurface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
     if (!impl_->cairoSurface) {
-        LOG_ERROR("Failed to create Cairo surface");
+        LOG_ERROR << "Failed to create Cairo surface";
         return false;
     }
     
     impl_->cairo = cairo_create(impl_->cairoSurface);
     if (!impl_->cairo) {
-        LOG_ERROR("Failed to create Cairo context");
+        LOG_ERROR << "Failed to create Cairo context";
         cairo_surface_destroy(impl_->cairoSurface);
         impl_->cairoSurface = nullptr;
         return false;
     }
     
     impl_->initialized = true;
-    LOG_INFO("RenderContext initialized: %dx%d", width, height);
+    LOG_INFO << "RenderContext initialized: " << width << "x" << height;
     return true;
 }
 

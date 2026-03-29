@@ -64,7 +64,7 @@ void VideoStream::start() {
     if (!playing_) {
         playing_ = true;
         initOpenGL();
-        LOG_INFO("VideoStream started: %s", source_.c_str());
+        LOG_INFO << "VideoStream started: " << source_;
     }
 }
 
@@ -72,7 +72,7 @@ void VideoStream::stop() {
     if (playing_) {
         playing_ = false;
         hasNewFrame_ = false;
-        LOG_INFO("VideoStream stopped");
+        LOG_INFO << "VideoStream stopped";
     }
 }
 
@@ -170,7 +170,7 @@ void VideoStream::initOpenGL() {
     glDeleteShader(fragmentShader);
     
     impl_->initialized = true;
-    LOG_INFO("VideoStream OpenGL initialized");
+    LOG_INFO << "VideoStream OpenGL initialized";
 }
 
 void VideoStream::updateTextures(const VideoFrame& frame) {

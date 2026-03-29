@@ -29,13 +29,13 @@ bool ApplicationContext::init() {
     startTime_ = tv.tv_sec * 1000 + tv.tv_usec / 1000;
     lastFpsTime_ = startTime_;
     
-    LOG_INFO("ApplicationContext initialized, data dir: %s", dataDir_.c_str());
+    LOG_INFO << "ApplicationContext initialized, data dir: " << dataDir_;
     return true;
 }
 
 void ApplicationContext::setResourceDir(const std::string& dir) {
     resourceDir_ = dir;
-    LOG_INFO("Resource directory set to: %s", dir.c_str());
+    LOG_INFO << "Resource directory set to: " << dir;
 }
 
 void ApplicationContext::updateFps() {
@@ -51,7 +51,7 @@ void ApplicationContext::updateFps() {
         frameCount_ = 0;
         lastFpsTime_ = currentTime;
         
-        LOG_VERBOSE("FPS: %.2f", fps_);
+        LOG_VERBOSE << "FPS: " << fps_;
     }
 }
 
@@ -66,7 +66,7 @@ void ApplicationContext::cleanup() {
     std::lock_guard<std::mutex> lock(mutex_);
     fps_ = 0.0f;
     frameCount_ = 0;
-    LOG_DEBUG("ApplicationContext cleaned up");
+    LOG_DEBUG << "ApplicationContext cleaned up";
 }
 
 } // namespace Component

@@ -34,13 +34,13 @@ bool EventDispatcher::init() {
         dispatchKeyEvent(static_cast<const KeyEvent&>(event));
     });
     
-    LOG_INFO("EventDispatcher initialized");
+    LOG_INFO << "EventDispatcher initialized";
     return true;
 }
 
 void EventDispatcher::setWidgetTree(WidgetTree* tree) {
     widgetTree_ = tree;
-    LOG_DEBUG("WidgetTree set for event dispatching");
+    LOG_DEBUG << "WidgetTree set for event dispatching";
 }
 
 bool EventDispatcher::dispatchTouchEvent(const TouchEvent& event) {
@@ -62,7 +62,7 @@ bool EventDispatcher::dispatchTouchEvent(const TouchEvent& event) {
     // 从控件树中找到命中的控件
     auto targetWidget = widgetTree_->findWidgetAt(event.x, event.y);
     if (!targetWidget) {
-        LOG_VERBOSE("No widget found at (%.1f, %.1f)", event.x, event.y);
+        LOG_VERBOSE << "No widget found at (" << event.x << ", " << event.y << ")";
         return false;
     }
     
@@ -70,8 +70,7 @@ bool EventDispatcher::dispatchTouchEvent(const TouchEvent& event) {
     bool handled = targetWidget->handleTouchEvent(event);
     
     if (handled) {
-        LOG_DEBUG("Touch event dispatched to widget: %s", 
-                  targetWidget->getId().c_str());
+        LOG_DEBUG << "Touch event dispatched to widget: " << targetWidget->getId();
     }
     
     return handled;
@@ -89,13 +88,13 @@ bool EventDispatcher::dispatchKeyEvent(const KeyEvent& event) {
     }
     
     // TODO: 键盘事件派发（需要焦点系统）
-    LOG_DEBUG("Key event received: keyCode=%d", event.keyCode);
+    LOG_DEBUG << "Key event received: keyCode=" << event.keyCode;
     return false;
 }
 
 void EventDispatcher::addListener(EventType type, EventListener listener) {
     listeners_[type].push_back(std::move(listener));
-    LOG_DEBUG("Event listener added for type: %d", static_cast<int>(type));
+    LOG_DEBUG << "Event listener added for type: " << static_cast<int>(type);
 }
 
 } // namespace Component

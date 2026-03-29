@@ -28,7 +28,7 @@ cairo_surface_t* ResourceManager::loadImage(const std::string& path) {
     if (it != resources_.end()) {
         it->second->lastAccessTime = std::chrono::steady_clock::now();
         it->second->accessCount++;
-        LOG_DEBUG("Image cache hit: %s", path.c_str());
+        LOG_DEBUG << "Image cache hit: " << path;
         return it->second->surface;
     }
     
@@ -38,7 +38,7 @@ cairo_surface_t* ResourceManager::loadImage(const std::string& path) {
     // 加载图片
     cairo_surface_t* surface = loadFromFile(fullPath);
     if (!surface) {
-        LOG_ERROR("Failed to load image: %s", path.c_str());
+        LOG_ERROR << "Failed to load image: " << path;
         return nullptr;
     }
     
@@ -51,11 +51,7 @@ cairo_surface_t* ResourceManager::loadImage(const std::string& path) {
     info->lastAccessTime = std::chrono::steady_clock::now();
     info->accessCount = 1;
     
-    LOG_INFO("Image loaded: %s (%dx%d, %zu KB)", 
-             path.c_str(),
-             cairo_image_surface_get_width(surface),
-             cairo_image_surface_get_height(surface),
-             info->memorySize / 1024);
+    LOG_INFO << "Image loaded: " << path << " (" << cairo_image_surface_get_width(surface) << "x" << cairo_image_surface_get_height(surface) << ", " << info->memorySize / 1024 << " KB)";
     
     cairo_surface_t* result = info->surface;
     resources_[path] = std::move(info);
@@ -85,7 +81,7 @@ void ResourceManager::unloadImage(const std::string& path) {
             cairo_surface_destroy(it->second->surface);
         }
         resources_.erase(it);
-        LOG_DEBUG("Image unloaded: %s", path.c_str());
+        LOG_DEBUG << "Image unloaded: " << path;
     }
 }
 
@@ -148,7 +144,7 @@ cairo_surface_t* ResourceManager::loadFromFile(const std::string& fullPath) {
     
     unsigned char* data = stbi_load(fullPath.c_str(), &width, &height, &channels, 4);
     if (!data) {
-        LOG_ERROR("stb_image failed to load: %s", fullPath.c_str());
+        LOG_ERROR << "stb_image failed to load: " << fullPath;
         return nullptr;
     }
     
@@ -156,7 +152,7 @@ cairo_surface_t* ResourceManager::loadFromFile(const std::string& fullPath) {
     cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
     if (!surface) {
         stbi_image_free(data);
-        LOG_ERROR("Failed to create Cairo surface: %dx%d", width, height);
+        LOG_ERROR << "Failed to create Cairo surface: " << width << "x" << height;
         return nullptr;
     }
     

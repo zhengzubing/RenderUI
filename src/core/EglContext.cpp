@@ -11,20 +11,20 @@ EglContext::~EglContext() {
 
 bool EglContext::init(void* display) {
     if (initialized_) {
-        LOG_WARNING("EGL already initialized");
+        LOG_WARNING << "EGL already initialized";
         return true;
     }
     
     // 获取 EGL 显示连接
     display_ = eglGetDisplay((EGLNativeDisplayType)display);
     if (display_ == EGL_NO_DISPLAY) {
-        LOG_ERROR("Failed to get EGL display");
+        LOG_ERROR << "Failed to get EGL display";
         return false;
     }
     
     // 初始化 EGL
     if (!eglInitialize(display_, nullptr, nullptr)) {
-        LOG_ERROR("Failed to initialize EGL");
+        LOG_ERROR << "Failed to initialize EGL";
         display_ = EGL_NO_DISPLAY;
         return false;
     }
@@ -44,13 +44,13 @@ bool EglContext::init(void* display) {
     
     EGLint numConfigs = 0;
     if (!eglChooseConfig(display_, configAttribs, &config_, 1, &numConfigs)) {
-        LOG_ERROR("Failed to choose EGL config");
+        LOG_ERROR << "Failed to choose EGL config";
         cleanup();
         return false;
     }
     
     if (numConfigs == 0) {
-        LOG_ERROR("No suitable EGL config found");
+        LOG_ERROR << "No suitable EGL config found";
         cleanup();
         return false;
     }
@@ -63,19 +63,19 @@ bool EglContext::init(void* display) {
     
     context_ = eglCreateContext(display_, config_, EGL_NO_CONTEXT, contextAttribs);
     if (context_ == EGL_NO_CONTEXT) {
-        LOG_ERROR("Failed to create EGL context");
+        LOG_ERROR << "Failed to create EGL context";
         cleanup();
         return false;
     }
     
     initialized_ = true;
-    LOG_INFO("EGL initialized successfully");
+    LOG_INFO << "EGL initialized successfully";
     return true;
 }
 
 EGLSurface EglContext::createSurface(void* nativeWindow, int width, int height) {
     if (!initialized_) {
-        LOG_ERROR("EGL not initialized");
+        LOG_ERROR << "EGL not initialized";
         return EGL_NO_SURFACE;
     }
     
@@ -90,11 +90,11 @@ EGLSurface EglContext::createSurface(void* nativeWindow, int width, int height) 
         display_, config_, (EGLNativeWindowType)nativeWindow, surfaceAttribs);
     
     if (surface == EGL_NO_SURFACE) {
-        LOG_ERROR("Failed to create EGL surface");
+        LOG_ERROR << "Failed to create EGL surface";
         return EGL_NO_SURFACE;
     }
     
-    LOG_INFO("EGL surface created: %dx%d", width, height);
+    LOG_INFO << "EGL surface created: " << width << "x" << height;
     return surface;
 }
 
@@ -104,7 +104,7 @@ bool EglContext::makeCurrent(EGLSurface surface) {
     }
     
     if (!eglMakeCurrent(display_, surface, surface, context_)) {
-        LOG_ERROR("Failed to make EGL context current");
+        LOG_ERROR << "Failed to make EGL context current";
         return false;
     }
     
@@ -129,7 +129,7 @@ void EglContext::cleanup() {
     }
     
     initialized_ = false;
-    LOG_INFO("EGL cleaned up");
+    LOG_INFO << "EGL cleaned up";
 }
 
 } // namespace Component

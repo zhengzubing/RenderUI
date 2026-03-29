@@ -20,53 +20,53 @@ bool DebugMenu::init() {
     // 添加默认菜单项
     addItem(1, "Toggle FPS", "切换帧率显示", [this]() {
         setShowFps(!showFps_);
-        LOG_INFO("FPS display: %s", showFps_ ? "ON" : "OFF");
+        LOG_INFO << "FPS display: " << (showFps_ ? "ON" : "OFF");
     });
     
     addItem(2, "Show Draw Calls", "显示绘制调用", [this]() {
         showDrawCalls_ = !showDrawCalls_;
-        LOG_INFO("Draw calls display: %s", showDrawCalls_ ? "ON" : "OFF");
+        LOG_INFO << "Draw calls display: " << (showDrawCalls_ ? "ON" : "OFF");
     });
     
     addItem(3, "Show Memory", "显示内存使用", [this]() {
         showMemory_ = !showMemory_;
         auto mem = ResourceManager::instance().getMemoryUsage();
-        LOG_INFO("Memory display: %s (%zu KB)", showMemory_ ? "ON" : "OFF", mem / 1024);
+        LOG_INFO << "Memory display: " << (showMemory_ ? "ON" : "OFF") << " (" << (mem / 1024) << " KB)";
     });
     
     addItem(4, "Dump Scene Graph", "输出场景图", []() {
-        LOG_INFO("=== Scene Graph Dump ===");
+        LOG_INFO << "=== Scene Graph Dump ===";
         // TODO: 实现场景图输出
-        LOG_INFO("========================");
+        LOG_INFO << "========================";
     });
     
     addItem(5, "Reload Config", "重载配置", []() {
-        LOG_INFO("Reloading configuration...");
+        LOG_INFO << "Reloading configuration...";
         // TODO: 实现配置重载
     });
     
     addItem(6, "Simulate CAN Signal", "模拟车速信号", []() {
-        LOG_INFO("Simulating CAN signal...");
+        LOG_INFO << "Simulating CAN signal...";
         // TODO: 实现 CAN 信号模拟
     });
     
     addItem(7, "Switch Theme", "切换主题", []() {
-        LOG_INFO("Switching theme...");
+        LOG_INFO << "Switching theme...";
         // TODO: 实现主题切换
     });
     
     addItem(8, "Language", "切换语言", []() {
-        LOG_INFO("Switching language...");
+        LOG_INFO << "Switching language...";
         // TODO: 实现语言切换
     });
     
     addItem(9, "Clean Resources", "清理资源", []() {
         ResourceManager::instance().cleanupUnused(60);
-        LOG_INFO("Resources cleaned up");
+        LOG_INFO << "Resources cleaned up";
     });
     
     initialized_ = true;
-    LOG_INFO("DebugMenu initialized");
+    LOG_INFO << "DebugMenu initialized";
     return true;
 }
 
@@ -82,7 +82,7 @@ void DebugMenu::addItem(int key, const std::string& label,
     item.enabled = true;
     
     items_[key] = std::move(item);
-    LOG_DEBUG("Debug menu item added: %d - %s", key, label.c_str());
+    LOG_DEBUG << "Debug menu item added: " << key << " - " << label;
 }
 
 void DebugMenu::removeItem(int key) {
@@ -123,7 +123,7 @@ bool DebugMenu::handleKey(int keyCode) {
     
     // F12 截图
     if (keyCode == 0xFFC9) {  // XK_F12
-        LOG_INFO("Screenshot requested (not implemented)");
+        LOG_INFO << "Screenshot requested (not implemented)";
         return true;
     }
     
@@ -157,7 +157,7 @@ bool DebugMenu::handleKey(int keyCode) {
 
 void DebugMenu::setVisible(bool visible) {
     visible_ = visible;
-    LOG_DEBUG("Debug menu visibility: %s", visible ? "ON" : "OFF");
+    LOG_DEBUG << "Debug menu visibility: " << (visible ? "ON" : "OFF");
 }
 
 void DebugMenu::toggle() {
@@ -194,20 +194,20 @@ void DebugMenu::renderFps() {
     oss << std::fixed << std::setprecision(1) << "FPS: " << fps;
     
     // TODO: 实际渲染到屏幕右上角
-    LOG_VERBOSE("%s", oss.str().c_str());
+    LOG_VERBOSE << oss.str();
 }
 
 void DebugMenu::renderMenu() {
     // TODO: 渲染调试菜单覆盖层
-    LOG_DEBUG("Rendering debug menu...");
+    LOG_DEBUG << "Rendering debug menu...";
     
     std::lock_guard<std::mutex> lock(mutex_);
     
-    LOG_INFO("=== Debug Menu ===");
+    LOG_INFO << "=== Debug Menu ===";
     for (const auto& [key, item] : items_) {
-        LOG_INFO(" [%d] %s - %s", key, item.label.c_str(), item.description.c_str());
+        LOG_INFO << " [" << key << "] " << item.label << " - " << item.description;
     }
-    LOG_INFO("===================");
+    LOG_INFO << "===================";
 }
 
 } // namespace Component

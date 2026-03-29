@@ -113,7 +113,21 @@ pkg_check_modules(WAYLAND REQUIRED
 
 # 生成 Wayland XDG Shell 协议头文件
 find_program(WAYLAND_SCANNER wayland-scanner REQUIRED)
-set(XDG_SHELL_XML ${WAYLAND_PROTOCOLS_DATADIR}/wayland/xdg-shell.xml)
+execute_process(
+    COMMAND pkg-config --variable=pkgdatadir wayland-protocols
+    OUTPUT_VARIABLE WAYLAND_PROTOCOLS_DATADIR
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE PKGCONFIG_RESULT
+)
+if(PKGCONFIG_RESULT EQUAL 0 AND EXISTS "${WAYLAND_PROTOCOLS_DATADIR}/stable/xdg-shell/xdg-shell.xml")
+    # 新版 wayland-protocols (1.15+) 使用 stable/xdg-shell/xdg-shell.xml
+    set(XDG_SHELL_XML ${WAYLAND_PROTOCOLS_DATADIR}/stable/xdg-shell/xdg-shell.xml)
+elseif(EXISTS "${WAYLAND_PROTOCOLS_DATADIR}/wayland/xdg-shell.xml")
+    # 旧版路径
+    set(XDG_SHELL_XML ${WAYLAND_PROTOCOLS_DATADIR}/wayland/xdg-shell.xml)
+else()
+    message(FATAL_ERROR "Could not find xdg-shell.xml in wayland-protocols datadir: ${WAYLAND_PROTOCOLS_DATADIR}")
+endif()
 set(XDG_SHELL_HEADER ${CMAKE_CURRENT_BINARY_DIR}/xdg-shell-client-protocol.h)
 set(XDG_SHELL_CODE ${CMAKE_CURRENT_BINARY_DIR}/xdg-shell-protocol.c)
 

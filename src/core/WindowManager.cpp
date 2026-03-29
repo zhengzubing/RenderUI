@@ -10,18 +10,18 @@ WindowManager& WindowManager::instance() {
 
 Window* WindowManager::createMainWindow(const std::string& title, int width, int height) {
     if (mainWindow_) {
-        LOG_WARNING("Main window already created");
+        LOG_WARNING << "Main window already created";
         return mainWindow_.get();
     }
     
     mainWindow_ = std::make_unique<Window>();
     if (!mainWindow_->create(title, width, height)) {
-        LOG_ERROR("Failed to create main window");
+        LOG_ERROR << "Failed to create main window";
         mainWindow_.reset();
         return nullptr;
     }
     
-    LOG_INFO("Main window created: %s, %dx%d", title.c_str(), width, height);
+    LOG_INFO << "Main window created: " << title << ", " << width << "x" << height;
     return mainWindow_.get();
 }
 
@@ -38,7 +38,7 @@ void WindowManager::destroyWindow(Window* window) {
     
     if (it != windows_.end()) {
         windows_.erase(it);
-        LOG_INFO("Window destroyed");
+        LOG_INFO << "Window destroyed";
     }
 }
 
@@ -53,7 +53,7 @@ void WindowManager::cleanup() {
         mainWindow_.reset();
     }
     
-    LOG_INFO("WindowManager cleaned up");
+    LOG_INFO << "WindowManager cleaned up";
 }
 
 } // namespace Component

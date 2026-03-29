@@ -17,7 +17,7 @@ bool CanSignalManager::init() {
     
     // 初始化 DBus
     if (!DBusAdapter::instance().init()) {
-        LOG_ERROR("Failed to initialize DBus");
+        LOG_ERROR << "Failed to initialize DBus";
         return false;
     }
     
@@ -29,14 +29,14 @@ bool CanSignalManager::init() {
     );
     
     initialized_ = true;
-    LOG_INFO("CanSignalManager initialized");
+    LOG_INFO << "CanSignalManager initialized";
     
     return true;
 }
 
 bool CanSignalManager::registerSignal(const std::string& signalId, const CanSignalDef& def) {
     if (signals_.find(signalId) != signals_.end()) {
-        LOG_WARNING("Signal already registered: %s", signalId.c_str());
+        LOG_WARNING << "Signal already registered: " << signalId;
         return false;
     }
     
@@ -48,8 +48,7 @@ bool CanSignalManager::registerSignal(const std::string& signalId, const CanSign
     
     if (subscriptionId > 0) {
         subscriptionIds_[signalId] = subscriptionId;
-        LOG_INFO("CAN signal registered: %s (%s.%s)", 
-                 signalId.c_str(), def.interface.c_str(), def.member.c_str());
+        LOG_INFO << "CAN signal registered: " << signalId << " (" << def.interface << "." << def.member << ")";
         return true;
     }
     
@@ -70,7 +69,7 @@ void CanSignalManager::unregisterSignal(const std::string& signalId) {
         currentValues_.erase(signalId);
         listeners_.erase(signalId);
         
-        LOG_INFO("CAN signal unregistered: %s", signalId.c_str());
+        LOG_INFO << "CAN signal unregistered: " << signalId;
     }
 }
 
@@ -127,7 +126,7 @@ void CanSignalManager::addValueChangedListener(const std::string& signalId,
 void CanSignalManager::simulateValue(const std::string& signalId, float value) {
     auto it = signals_.find(signalId);
     if (it == signals_.end()) {
-        LOG_WARNING("Signal not found for simulation: %s", signalId.c_str());
+        LOG_WARNING << "Signal not found for simulation: " << signalId;
         return;
     }
     
@@ -165,7 +164,7 @@ void CanSignalManager::simulateValue(const std::string& signalId, float value) {
         }
     }
     
-    LOG_DEBUG("Simulated signal: %s = %.2f", signalId.c_str(), value);
+    LOG_DEBUG << "Simulated signal: %s = %.2f" << signalId.c_str() << value;
 }
 
 void CanSignalManager::onSignalReceived(const std::string& signalName, SignalValue value) {

@@ -15,7 +15,7 @@ WidgetTree::~WidgetTree() = default;
 
 void WidgetTree::addRoot(std::shared_ptr<Widget> widget, const std::string& id) {
     if (!widget) {
-        LOG_ERROR("Cannot add null widget as root");
+        LOG_ERROR << "Cannot add null widget as root";
         return;
     }
     
@@ -29,19 +29,19 @@ void WidgetTree::addRoot(std::shared_ptr<Widget> widget, const std::string& id) 
     roots_.push_back(node);
     widgetMap_[id] = node;
     
-    LOG_DEBUG("Root widget added: %s", id.c_str());
+    LOG_DEBUG << "Root widget added: " << id;
 }
 
 void WidgetTree::addChild(const std::string& parentId, std::shared_ptr<Widget> widget, 
                           const std::string& childId) {
     if (!widget) {
-        LOG_ERROR("Cannot add null widget as child");
+        LOG_ERROR << "Cannot add null widget as child";
         return;
     }
     
     auto parentNode = findNode(parentId);
     if (!parentNode) {
-        LOG_ERROR("Parent widget not found: %s", parentId.c_str());
+        LOG_ERROR << "Parent widget not found: " << parentId;
         return;
     }
     
@@ -56,13 +56,13 @@ void WidgetTree::addChild(const std::string& parentId, std::shared_ptr<Widget> w
     parentNode->children.push_back(childNode);
     widgetMap_[childId] = childNode;
     
-    LOG_DEBUG("Child widget added: %s -> %s", parentId.c_str(), childId.c_str());
+    LOG_DEBUG << "Child widget added: " << parentId << " -> " << childId;
 }
 
 void WidgetTree::removeWidget(const std::string& id) {
     auto it = widgetMap_.find(id);
     if (it == widgetMap_.end()) {
-        LOG_WARNING("Widget not found: %s", id.c_str());
+        LOG_WARNING << "Widget not found: " << id;
         return;
     }
     
@@ -90,7 +90,7 @@ void WidgetTree::removeWidget(const std::string& id) {
     }
     
     widgetMap_.erase(it);
-    LOG_DEBUG("Widget removed: %s", id.c_str());
+    LOG_DEBUG << "Widget removed: " << id;
 }
 
 std::shared_ptr<Widget> WidgetTree::getWidget(const std::string& id) {
@@ -117,7 +117,7 @@ void WidgetTree::updateLayout(int screenWidth, int screenHeight) {
     impl_->screenHeight = screenHeight;
     
     // TODO: 实现布局计算
-    LOG_DEBUG("Layout updated: %dx%d", screenWidth, screenHeight);
+    LOG_DEBUG << "Layout updated: " << screenWidth << "x" << screenHeight;
 }
 
 void WidgetTree::render(RenderContext& ctx) {
@@ -136,7 +136,7 @@ void WidgetTree::markAllDirty() {
     for (auto& root : roots_) {
         markNodeDirty(root);
     }
-    LOG_DEBUG("All widgets marked dirty");
+    LOG_DEBUG << "All widgets marked dirty";
 }
 
 std::shared_ptr<WidgetNode> WidgetTree::findNode(const std::string& id) {

@@ -77,7 +77,7 @@ bool SkiaRenderer::init(int width, int height, bool useGpu) {
         impl_->grContext = GrDirectContext::MakeGL(glGetIntegerv);
         
         if (!impl_->grContext) {
-            LOG_ERROR("Failed to create GrDirectContext");
+            LOG_ERROR << "Failed to create GrDirectContext";
             return false;
         }
         
@@ -94,15 +94,15 @@ bool SkiaRenderer::init(int width, int height, bool useGpu) {
             kRGBA_8888_SkColorType, nullptr, &props);
         
         if (!impl_->surface) {
-            LOG_ERROR("Failed to create SkSurface");
+            LOG_ERROR << "Failed to create SkSurface";
             return false;
         }
         
-        LOG_INFO("SkiaRenderer initialized with GPU: %dx%d", width, height);
+        LOG_INFO << "SkiaRenderer initialized with GPU: " << width << "x" << height;
     } else {
         // CPU 模式（简化实现，使用 raster 表面）
         // TODO: 实现 CPU 模式
-        LOG_WARNING("CPU mode not fully implemented yet");
+        LOG_WARNING << "CPU mode not fully implemented yet";
     }
     
     initialized_ = true;
@@ -243,7 +243,7 @@ SkiaRenderer::SkiaRenderer() : impl_(std::make_unique<Impl>()) {}
 SkiaRenderer::~SkiaRenderer() = default;
 
 bool SkiaRenderer::init(int width, int height, bool useGpu) {
-    LOG_WARNING("Skia support not enabled. Recompile with -DUSE_SKIA=ON");
+    LOG_WARNING << "Skia support not enabled. Recompile with -DUSE_SKIA=ON";
     return false;
 }
 

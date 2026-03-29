@@ -38,21 +38,21 @@ Surface::~Surface() {
 
 bool Surface::create(wl_compositor* compositor, xdg_wm_base* wmBase) {
     if (!compositor || !wmBase) {
-        LOG_ERROR("Invalid compositor or wmBase");
+        LOG_ERROR << "Invalid compositor or wmBase";
         return false;
     }
     
     // 创建 Wayland surface
     surface_ = wl_compositor_create_surface(compositor);
     if (!surface_) {
-        LOG_ERROR("Failed to create wl_surface");
+        LOG_ERROR << "Failed to create wl_surface";
         return false;
     }
     
     // 创建 XDG surface
     xdgSurface_ = xdg_wm_base_get_xdg_surface(wmBase, surface_);
     if (!xdgSurface_) {
-        LOG_ERROR("Failed to create xdg_surface");
+        LOG_ERROR << "Failed to create xdg_surface";
         cleanup();
         return false;
     }
@@ -63,7 +63,7 @@ bool Surface::create(wl_compositor* compositor, xdg_wm_base* wmBase) {
     // 创建 XDG toplevel (窗口)
     toplevel_ = xdg_surface_get_toplevel(xdgSurface_);
     if (!toplevel_) {
-        LOG_ERROR("Failed to create xdg_toplevel");
+        LOG_ERROR << "Failed to create xdg_toplevel";
         cleanup();
         return false;
     }
@@ -75,7 +75,7 @@ bool Surface::create(wl_compositor* compositor, xdg_wm_base* wmBase) {
     wl_surface_commit(surface_);
     wl_display_flush(wl_surface_get_display(surface_));
     
-    LOG_INFO("Wayland surface created");
+    LOG_INFO << "Wayland surface created";
     return true;
 }
 
@@ -116,7 +116,7 @@ void Surface::cleanup() {
     }
     
     configured_ = false;
-    LOG_DEBUG("Wayland surface cleaned up");
+    LOG_DEBUG << "Wayland surface cleaned up";
 }
 
 } // namespace Component

@@ -489,7 +489,7 @@ public:
             lastTime_ = now;
             
             // 记录日志
-            LOG_INFO("FPS: {}", fps_);
+            LOG_INFO << "FPS: {}" << fps_;
         }
     }
     

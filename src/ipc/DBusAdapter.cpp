@@ -25,13 +25,13 @@ bool DBusAdapter::init() {
     connection_ = g_bus_get_sync(G_BUS_TYPE_SYSTEM, nullptr, &error);
     
     if (!connection_) {
-        LOG_ERROR("Failed to connect to DBus: %s", error->message);
+        LOG_ERROR << "Failed to connect to DBus: " << error->message;
         g_error_free(error);
         return false;
     }
     
     connected_ = true;
-    LOG_INFO("Connected to DBus system bus");
+    LOG_INFO << "Connected to DBus system bus";
     
     return true;
 }
@@ -42,7 +42,7 @@ uint32_t DBusAdapter::subscribeSignal(const std::string& interface,
     std::lock_guard<std::mutex> lock(mutex_);
     
     if (!connected_) {
-        LOG_ERROR("DBus not connected");
+        LOG_ERROR << "DBus not connected";
         return 0;
     }
     
@@ -70,7 +70,7 @@ uint32_t DBusAdapter::subscribeSignal(const std::string& interface,
         nullptr
     );
     
-    LOG_INFO("Subscribed to DBus signal: %s.%s", interface.c_str(), member.c_str());
+    LOG_INFO << "Subscribed to DBus signal: " << interface << "." << member;
     return subscriptionId;
 }
 
@@ -80,7 +80,7 @@ void DBusAdapter::unsubscribeSignal(uint32_t subscriptionId) {
     auto it = subscriptions_.find(subscriptionId);
     if (it != subscriptions_.end()) {
         subscriptions_.erase(it);
-        LOG_DEBUG("Unsubscribed from signal: %u", subscriptionId);
+        LOG_DEBUG << "Unsubscribed from signal: " << subscriptionId;
     }
 }
 
@@ -95,7 +95,7 @@ bool DBusAdapter::sendSignal(const std::string& interface,
                               SignalType type,
                               SignalValue value) {
     if (!connected_) {
-        LOG_ERROR("DBus not connected");
+        LOG_ERROR << "DBus not connected";
         return false;
     }
     
@@ -119,7 +119,7 @@ bool DBusAdapter::sendSignal(const std::string& interface,
             parameters = g_variant_new("(b)", value.b ? TRUE : FALSE);
             break;
         default:
-            LOG_ERROR("Unsupported signal type");
+            LOG_ERROR << "Unsupported signal type";
             return false;
     }
     
@@ -134,7 +134,7 @@ bool DBusAdapter::sendSignal(const std::string& interface,
         nullptr
     );
     
-    LOG_DEBUG("Sent DBus signal: %s.%s", interface.c_str(), member.c_str());
+    LOG_DEBUG << "Sent DBus signal: " << interface << "." << member;
     return true;
 }
 
@@ -178,7 +178,7 @@ void DBusAdapter::onDBusSignal(_GDBusConnection* connection,
     // 调用回调
     adapter->signalCallback_(std::string(signal_name), value);
     
-    LOG_DEBUG("Received DBus signal: %s", signal_name);
+    LOG_DEBUG << "Received DBus signal: " << signal_name;
 }
 
 void DBusAdapter::cleanup() {
@@ -192,7 +192,7 @@ void DBusAdapter::cleanup() {
     subscriptions_.clear();
     connected_ = false;
     
-    LOG_INFO("DBus connection cleaned up");
+    LOG_INFO << "DBus connection cleaned up";
 }
 
 } // namespace Component

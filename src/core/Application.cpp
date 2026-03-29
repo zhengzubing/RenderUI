@@ -35,7 +35,7 @@ bool Application::init(const std::string& title, int width, int height) {
     
     // 初始化日志系统
     Logger::instance().init(plog::info, "renderui.log");
-    LOG_INFO("Application initializing: %s %dx%d", title.c_str(), width, height);
+    LOG_INFO << "Application initializing: " << title << " " << width << "x" << height;
     
     // 初始化应用上下文
     ApplicationContext::instance().init();
@@ -55,31 +55,31 @@ bool Application::init(const std::string& title, int width, int height) {
     // 创建主窗口
     impl_->window = WindowManager::instance().createMainWindow(title, width, height);
     if (!impl_->window) {
-        LOG_ERROR("Failed to create main window");
+        LOG_ERROR << "Failed to create main window";
         return false;
     }
     
     // 初始化渲染上下文
     if (!impl_->renderContext.init(impl_->window->getEglDisplay(), impl_->window->getEglSurface())) {
-        LOG_ERROR("Failed to initialize render context");
+        LOG_ERROR << "Failed to initialize render context";
         return false;
     }
     
     // 显示窗口
     impl_->window->show();
     
-    LOG_INFO("Application initialized successfully");
+    LOG_INFO << "Application initialized successfully";
     return true;
 }
 
 int Application::run() {
     if (!impl_ || !impl_->window) {
-        LOG_ERROR("Application not initialized");
+        LOG_ERROR << "Application not initialized";
         return -1;
     }
     
     impl_->running = true;
-    LOG_INFO("Application main loop started");
+    LOG_INFO << "Application main loop started";
     
     // 主循环
     auto lastFrameTime = std::chrono::steady_clock::now();
@@ -112,17 +112,17 @@ int Application::run() {
         }
     }
     
-    LOG_INFO("Application main loop ended");
+    LOG_INFO << "Application main loop ended";
     return 0;
 }
 
 void Application::quit() {
     impl_->running = false;
-    LOG_INFO("Application quit requested");
+    LOG_INFO << "Application quit requested";
 }
 
 void Application::shutdown() {
-    LOG_INFO("Application shutting down");
+    LOG_INFO << "Application shutting down";
     
     impl_->renderContext.cleanup();
     WindowManager::instance().cleanup();
@@ -131,7 +131,7 @@ void Application::shutdown() {
     
     impl_.reset();
     
-    LOG_INFO("Application shutdown complete");
+    LOG_INFO << "Application shutdown complete";
 }
 
 } // namespace Component

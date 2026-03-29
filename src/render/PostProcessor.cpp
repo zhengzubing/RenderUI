@@ -124,7 +124,7 @@ bool PostProcessor::init(int width, int height) {
                                GL_RENDERBUFFER, rbo_);
     
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        LOG_ERROR("FBO is not complete");
+        LOG_ERROR << "FBO is not complete";
         cleanup();
         return false;
     }
@@ -133,7 +133,7 @@ bool PostProcessor::init(int width, int height) {
     
     // 编译 Shader（使用圆角 Shader 作为默认）
     if (!createShader(sVertexShader, sFragmentRounded)) {
-        LOG_ERROR("Failed to create shader");
+        LOG_ERROR << "Failed to create shader";
         cleanup();
         return false;
     }
@@ -145,7 +145,7 @@ bool PostProcessor::init(int width, int height) {
     impl_->uContrastLoc = glGetUniformLocation(shaderProgram_, "uContrast");
     
     initialized_ = true;
-    LOG_INFO("PostProcessor initialized: %dx%d", width, height);
+    LOG_INFO << "PostProcessor initialized: " << width << "x" << height;
     
     return true;
 }
@@ -201,7 +201,7 @@ void PostProcessor::applyShadow(float blur, float offset) {
 
 void PostProcessor::applyBlur(float radius) {
     // TODO: 实现高斯模糊（需要多 pass）
-    LOG_DEBUG("Blur effect requested: %.2f", radius);
+    LOG_DEBUG << "Blur effect requested: " << radius;
 }
 
 void PostProcessor::applyColorAdjust(float brightness, float contrast) {
@@ -216,7 +216,7 @@ void PostProcessor::applyColorAdjust(float brightness, float contrast) {
 
 void PostProcessor::applyGrayscale() {
     // TODO: 实现灰度效果
-    LOG_DEBUG("Grayscale effect applied");
+    LOG_DEBUG << "Grayscale effect applied";
 }
 
 void PostProcessor::resize(int width, int height) {
@@ -263,7 +263,7 @@ bool PostProcessor::createShader(const char* vertexSource, const char* fragmentS
     if (!success) {
         char infoLog[512];
         glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
-        LOG_ERROR("Vertex shader compilation failed: %s", infoLog);
+        LOG_ERROR << "Vertex shader compilation failed: " << infoLog;
         return false;
     }
     
@@ -275,7 +275,7 @@ bool PostProcessor::createShader(const char* vertexSource, const char* fragmentS
     if (!success) {
         char infoLog[512];
         glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
-        LOG_ERROR("Fragment shader compilation failed: %s", infoLog);
+        LOG_ERROR << "Fragment shader compilation failed: " << infoLog;
         return false;
     }
     
@@ -288,7 +288,7 @@ bool PostProcessor::createShader(const char* vertexSource, const char* fragmentS
     if (!success) {
         char infoLog[512];
         glGetProgramInfoLog(shaderProgram_, 512, nullptr, infoLog);
-        LOG_ERROR("Shader program linking failed: %s", infoLog);
+        LOG_ERROR << "Shader program linking failed: " << infoLog;
         return false;
     }
     

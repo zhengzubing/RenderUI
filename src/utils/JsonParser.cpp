@@ -11,17 +11,17 @@ namespace Component {
 json JsonParser::loadFromFile(const std::string& path) {
     std::ifstream file(path);
     if (!file.is_open()) {
-        LOG_ERROR("Failed to open JSON file: %s", path.c_str());
+        LOG_ERROR << "Failed to open JSON file: " << path;
         return json();
     }
     
     try {
         json config;
         file >> config;
-        LOG_INFO("JSON loaded from: %s", path.c_str());
+        LOG_INFO << "JSON loaded from: " << path;
         return config;
     } catch (const std::exception& e) {
-        LOG_ERROR("Failed to parse JSON: %s", e.what());
+        LOG_ERROR << "Failed to parse JSON: " << e.what();
         return json();
     }
 }
@@ -30,7 +30,7 @@ json JsonParser::loadFromString(const std::string& content) {
     try {
         return json::parse(content);
     } catch (const std::exception& e) {
-        LOG_ERROR("Failed to parse JSON: %s", e.what());
+        LOG_ERROR << "Failed to parse JSON: " << e.what();
         return json();
     }
 }
@@ -40,7 +40,7 @@ bool JsonParser::parseWindowConfig(const json& config,
                                     int& width,
                                     int& height) {
     if (!config.contains("window")) {
-        LOG_WARNING("No window config found");
+        LOG_WARNING << "No window config found";
         return false;
     }
     
@@ -58,13 +58,13 @@ bool JsonParser::parseWindowConfig(const json& config,
         height = window["height"].get<int>();
     }
     
-    LOG_INFO("Window config parsed: %s %dx%d", title.c_str(), width, height);
+    LOG_INFO << "Window config parsed: " << title << " " << width << "x" << height;
     return true;
 }
 
 std::shared_ptr<Widget> JsonParser::parseWidget(const json& config) {
     if (!config.contains("type")) {
-        LOG_WARNING("Widget type not specified");
+        LOG_WARNING << "Widget type not specified";
         return nullptr;
     }
     
@@ -88,7 +88,7 @@ std::shared_ptr<Widget> JsonParser::parseWidget(const json& config) {
         }
         
         widget = label;
-        LOG_DEBUG("Label widget created: %s", text.c_str());
+        LOG_DEBUG << "Label widget created: " << text;
     }
     else if (type == "Button") {
         std::string text = config.value("text", "");
@@ -107,21 +107,21 @@ std::shared_ptr<Widget> JsonParser::parseWidget(const json& config) {
         }
         
         widget = button;
-        LOG_DEBUG("Button widget created: %s", text.c_str());
+        LOG_DEBUG << "Button widget created: " << text;
     }
     else if (type == "ImageView") {
         std::string image = config.value("image", "");
         auto imageView = std::make_shared<ImageView>(image);
         
         widget = imageView;
-        LOG_DEBUG("ImageView widget created: %s", image.c_str());
+        LOG_DEBUG << "ImageView widget created: " << image;
     }
     else if (type == "Container") {
         widget = std::make_shared<Widget>();
-        LOG_DEBUG("Container widget created");
+        LOG_DEBUG << "Container widget created";
     }
     else {
-        LOG_WARNING("Unknown widget type: %s", type.c_str());
+        LOG_WARNING << "Unknown widget type: " << type;
         return nullptr;
     }
     
@@ -165,7 +165,7 @@ std::shared_ptr<Widget> JsonParser::parseWidget(const json& config) {
 
 bool JsonParser::parseWidgets(const json& config, WidgetTree& tree) {
     if (!config.contains("widgets")) {
-        LOG_WARNING("No widgets config found");
+        LOG_WARNING << "No widgets config found";
         return false;
     }
     
@@ -177,7 +177,7 @@ bool JsonParser::parseWidgets(const json& config, WidgetTree& tree) {
         }
     }
     
-    LOG_INFO("Widgets parsed: %zu roots", config["widgets"].size());
+    LOG_INFO << "Widgets parsed: " << config["widgets"].size() << " roots";
     return true;
 }
 
