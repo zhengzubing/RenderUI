@@ -111,6 +111,28 @@ pkg_check_modules(WAYLAND REQUIRED
     wayland-protocols
 )
 
+# 生成 Wayland XDG Shell 协议头文件
+find_program(WAYLAND_SCANNER wayland-scanner REQUIRED)
+set(XDG_SHELL_XML ${WAYLAND_PROTOCOLS_DATADIR}/wayland/xdg-shell.xml)
+set(XDG_SHELL_HEADER ${CMAKE_CURRENT_BINARY_DIR}/xdg-shell-client-protocol.h)
+set(XDG_SHELL_CODE ${CMAKE_CURRENT_BINARY_DIR}/xdg-shell-protocol.c)
+
+add_custom_command(
+    OUTPUT ${XDG_SHELL_HEADER}
+    COMMAND ${WAYLAND_SCANNER} client-header ${XDG_SHELL_XML} ${XDG_SHELL_HEADER}
+    DEPENDS ${XDG_SHELL_XML}
+    COMMENT "Generating XDG Shell header"
+)
+
+add_custom_command(
+    OUTPUT ${XDG_SHELL_CODE}
+    COMMAND ${WAYLAND_SCANNER} private-code ${XDG_SHELL_XML} ${XDG_SHELL_CODE}
+    DEPENDS ${XDG_SHELL_XML}
+    COMMENT "Generating XDG Shell code"
+)
+
+add_custom_target(wayland_protocols DEPENDS ${XDG_SHELL_HEADER} ${XDG_SHELL_CODE})
+
 # 10. EGL - OpenGL ES 上下文
 pkg_check_modules(EGL REQUIRED egl)
 
@@ -158,7 +180,8 @@ file(GLOB_RECURSE CORE_SOURCES
 )
 
 # 创建静态库
-add_library(RenderUICore STATIC ${CORE_SOURCES})
+add_library(RenderUICore STATIC ${CORE_SOURCES} ${XDG_SHELL_CODE})
+add_dependencies(RenderUICore wayland_protocols)
 
 target_include_directories(RenderUICore
     PUBLIC
@@ -171,6 +194,7 @@ target_include_directories(RenderUICore
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/resource>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/ipc>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/utils>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
         $<INSTALL_INTERFACE:include>
     PRIVATE
         ${CAIRO_INCLUDE_DIRS}

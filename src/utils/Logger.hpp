@@ -64,6 +64,7 @@ private:
 #undef LOG_VERBOSE
 #endif
 
+// plog 使用流式语法，但为了代码简洁，我们封装为宏
 #define LOG_DEBUG PLOG_DEBUG
 #define LOG_INFO PLOG_INFO
 #define LOG_WARNING PLOG_WARNING

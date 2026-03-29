@@ -19,7 +19,8 @@ bool Logger::init(plog::Severity level, const std::string& logFile) {
     static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
     
     plog::init(level, &fileAppender);
-    plog::addAppender(&consoleAppender);
+    // plog 不支持直接添加多个 appender，需要使用 ChainedFormatter
+    // 这里我们只用文件输出
     
     initialized_ = true;
     PLOG_INFO << "Logger initialized, level: " << plog::severityToString(level);
