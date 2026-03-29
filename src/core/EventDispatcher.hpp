@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Component/EventLoop.hpp"
-#include "Component/WidgetTree.hpp"
+#include "EventLoop.hpp"
+#include "WidgetTree.hpp"
 #include <memory>
 
 namespace Component {

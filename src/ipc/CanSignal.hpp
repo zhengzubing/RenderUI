@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Component/DBusAdapter.hpp"
+#include "DBusAdapter.hpp"
 #include <string>
 #include <map>
 #include <functional>

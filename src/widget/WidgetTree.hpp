@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Component/Widget.hpp"
-#include "Component/RenderContext.hpp"
+#include "Widget.hpp"
+#include "RenderContext.hpp"
 #include <memory>
 #include <vector>
 #include <string>

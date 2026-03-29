@@ -208,7 +208,7 @@ tests/
 cmake -DENABLE_PERFETTO=ON ..
 
 // 2. 初始化和使用
-#include "Component/PerfettoTracker.hpp"
+#include "PerfettoTracker.hpp"
 
 void main() {
     auto& tracker = PerfettoTracker::instance();

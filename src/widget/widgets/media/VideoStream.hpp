@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Component/Widget.hpp"
+#include "Widget.hpp"
 #include <memory>
 #include <mutex>
 #include <cstdint>

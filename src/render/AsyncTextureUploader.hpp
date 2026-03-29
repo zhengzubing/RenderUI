@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Component/PboPool.hpp"
+#include "PboPool.hpp"
 #include <thread>
 #include <queue>
 #include <mutex>

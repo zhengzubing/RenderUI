@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Component/Types.hpp"
-#include "Component/EventLoop.hpp"
+#include "Types.hpp"
+#include "EventLoop.hpp"
 #include <memory>
 #include <string>
 #include <vector>

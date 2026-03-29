@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Component/RenderContext.hpp"
+#include "RenderContext.hpp"
 #include <memory>
 #include <string>
 

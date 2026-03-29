@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Component/Widget.hpp"
+#include "Widget.hpp"
 #include <string>
 #include <functional>
 

@@ -1,4 +1,4 @@
-#include "Component/PerfettoTracker.hpp"
+#include "PerfettoTracker.hpp"
 #include "core/Application.hpp"
 #include "core/Logger.hpp"
 #include <iostream>

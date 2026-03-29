@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Component/Widget.hpp"
-#include "Component/LayoutTypes.hpp"
+#include "Widget.hpp"
+#include "LayoutTypes.hpp"
 #include <vector>
 
 namespace Component {

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Component/Surface.hpp"
-#include "Component/EglContext.hpp"
+#include "Surface.hpp"
+#include "EglContext.hpp"
 #include <string>
 #include <memory>
 

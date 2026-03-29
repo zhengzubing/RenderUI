@@ -138,7 +138,7 @@ tests/
 
 ```cpp
 #include <gtest/gtest.h>
-#include "Component/YourComponent.hpp"
+#include "YourComponent.hpp"
 
 using namespace RenderUI;
 

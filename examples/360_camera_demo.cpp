@@ -12,17 +12,17 @@
  * 7. 多视图切换（正常/俯视/侧视）
  */
 
-#include "Component/Application.hpp"
-#include "Component/WidgetTree.hpp"
-#include "Component/widgets/Label.hpp"
-#include "Component/widgets/Button.hpp"
-#include "Component/widgets/ImageView.hpp"
-#include "Component/VideoStream.hpp"
-#include "Component/Model3D.hpp"
-#include "Component/CanSignal.hpp"
-#include "Component/JsonParser.hpp"
-#include "Component/AbsoluteLayout.hpp"
-#include "Component/Logger.hpp"
+#include "Application.hpp"
+#include "WidgetTree.hpp"
+#include "widgets/Label.hpp"
+#include "widgets/Button.hpp"
+#include "widgets/ImageView.hpp"
+#include "VideoStream.hpp"
+#include "Model3D.hpp"
+#include "CanSignal.hpp"
+#include "JsonParser.hpp"
+#include "AbsoluteLayout.hpp"
+#include "Logger.hpp"
 
 using namespace Component;
 
