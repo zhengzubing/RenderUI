@@ -163,6 +163,14 @@ add_library(RenderUICore STATIC ${CORE_SOURCES})
 target_include_directories(RenderUICore
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/core>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/widget>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/widget/widgets>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/layout>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/render>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/resource>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/ipc>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/utils>
         $<INSTALL_INTERFACE:include>
     PRIVATE
         ${CAIRO_INCLUDE_DIRS}
