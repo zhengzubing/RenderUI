@@ -203,8 +203,7 @@ void CanSignalManager::onSignalReceived(const std::string& signalName, SignalVal
                 }
             }
             
-            LOG_DEBUG("CAN signal received: %s = %.2f %s", 
-                     signalId.c_str(), physicalValue, def.unit.c_str());
+            LOG_DEBUG << "CAN signal received: " << signalId << " = " << physicalValue << " " << def.unit;
             break;
         }
     }

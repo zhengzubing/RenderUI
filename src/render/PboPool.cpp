@@ -1,5 +1,6 @@
 #include "PboPool.hpp"
 #include "Logger.hpp"
+#include <GLES2/gl2ext.h>
 
 namespace Component {
 

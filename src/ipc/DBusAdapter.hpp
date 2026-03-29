@@ -5,6 +5,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <glib-2.0/glib.h>
 
 // DBus GLib 头文件
 struct _GDBusConnection;

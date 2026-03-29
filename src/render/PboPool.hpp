@@ -19,9 +19,11 @@ public:
      * @brief PBO 配置
      */
     struct Config {
-        size_t bufferSize = 0;      // 单个缓冲区大小（字节）
-        int bufferCount = 3;        // 缓冲区数量（双缓冲/三缓冲）
-        GLenum usage = GL_STREAM_DRAW;  // 使用模式
+        size_t bufferSize;
+        int bufferCount;
+        GLenum usage;
+        
+        Config() : bufferSize(0), bufferCount(3), usage(GL_STREAM_DRAW) {}
     };
     
     explicit PboPool(const Config& config = Config());

@@ -10,10 +10,10 @@ static void registryGlobal(void* data, wl_registry* registry,
     Window* window = static_cast<Window*>(data);
     
     if (strcmp(interface, wl_compositor_interface.name) == 0) {
-        window->impl_->compositor = static_cast<wl_compositor*>(
+        window->compositor_ = static_cast<wl_compositor*>(
             wl_registry_bind(registry, name, &wl_compositor_interface, 4));
     } else if (strcmp(interface, xdg_wm_base_interface.name) == 0) {
-        window->impl_->wmBase = static_cast<xdg_wm_base*>(
+        window->wmBase_ = static_cast<xdg_wm_base*>(
             wl_registry_bind(registry, name, &xdg_wm_base_interface, 2));
     }
 }
@@ -57,14 +57,14 @@ bool Window::create(const std::string& title, int width, int height) {
     wl_display_dispatch(display_);
     wl_display_roundtrip(display_);
     
-    if (!impl_->compositor || !impl_->wmBase) {
+    if (!compositor_ || !wmBase_) {
         LOG_ERROR << "Failed to get Wayland compositor or wm_base";
         cleanup();
         return false;
     }
     
     // 创建 Surface
-    if (!surface_.create(impl_->compositor, impl_->wmBase)) {
+    if (!surface_.create(compositor_, wmBase_)) {
         LOG_ERROR << "Failed to create Wayland surface";
         cleanup();
         return false;
