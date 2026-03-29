@@ -4,14 +4,14 @@
 
 # 测试可执行文件
 add_executable(renderui_tests
-    main.cpp
-    test_widget.cpp
-    test_layout.cpp
-    test_event.cpp
-    test_resource.cpp
-    test_video_stream.cpp
-    test_model3d.cpp
-    test_dbus.cpp
+    ../src/main.cpp
+    ../src/test_widget.cpp
+    ../src/test_layout.cpp
+    ../src/test_event.cpp
+    ../src/test_resource.cpp
+    ../src/test_video_stream.cpp
+    ../src/test_model3d.cpp
+    ../src/test_dbus.cpp
 )
 
 target_link_libraries(renderui_tests
@@ -23,7 +23,6 @@ target_link_libraries(renderui_tests
 # 包含头文件路径
 target_include_directories(renderui_tests
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/include
 )
 

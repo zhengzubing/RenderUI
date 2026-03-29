@@ -148,14 +148,11 @@ endif()
 # 收集所有源文件
 file(GLOB_RECURSE CORE_SOURCES 
     src/core/*.cpp
-    src/window/*.cpp
     src/widget/*.cpp
     src/widget/widgets/*.cpp
-    src/widget/events/*.cpp
     src/layout/*.cpp
     src/render/*.cpp
     src/resource/*.cpp
-    src/data/*.cpp
     src/ipc/*.cpp
     src/utils/*.cpp
 )
@@ -165,7 +162,7 @@ add_library(RenderUICore STATIC ${CORE_SOURCES})
 
 target_include_directories(RenderUICore
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<INSTALL_INTERFACE:include>
     PRIVATE
         ${CAIRO_INCLUDE_DIRS}

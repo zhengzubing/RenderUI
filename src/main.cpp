@@ -1,25 +1,37 @@
-#include "Component/Application.hpp"
-#include "Component/Logger.hpp"
+/**
+ * @file main.cpp
+ * @brief 测试入口点
+ */
 
-using namespace Component;
+#include <gtest/gtest.h>
+#include <iostream>
 
-int main(int argc, char* argv[]) {
-    // 获取应用实例
-    auto app = Application::instance();
+/**
+ * @brief 测试前初始化
+ */
+void SetUpTestSuite() {
+    std::cout << "=== RenderUI Test Suite Started ===" << std::endl;
+}
+
+/**
+ * @brief 测试后清理
+ */
+void TearDownTestSuite() {
+    std::cout << "=== RenderUI Test Suite Finished ===" << std::endl;
+}
+
+int main(int argc, char** argv) {
+    // 初始化 GoogleTest
+    ::testing::InitGoogleTest(&argc, argv);
     
-    // 初始化应用（创建 1920x1080 窗口）
-    if (!app->init("RenderUI Demo", 1920, 1080)) {
-        PLOG_ERROR << "Failed to initialize application";
-        return -1;
-    }
+    // 设置测试套件
+    SetUpTestSuite();
     
-    PLOG_INFO << "Application started successfully";
+    // 运行所有测试
+    int result = RUN_ALL_TESTS();
     
-    // 运行主循环
-    int result = app->run();
-    
-    // 清理资源
-    app->shutdown();
+    // 清理
+    TearDownTestSuite();
     
     return result;
 }
