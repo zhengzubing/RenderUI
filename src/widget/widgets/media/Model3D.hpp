@@ -84,9 +84,6 @@ protected:
     void onDraw(Canvas& canvas) override;
     
 private:
-    struct Impl;
-    std::unique_ptr<Impl> impl_;
-    
     ModelData modelData_;
     
     // 变换矩阵
@@ -105,6 +102,8 @@ private:
     float rotateSpeed_ = 0.01f;
     float currentAngle_ = 0;
     
+    // 加载状态
+    bool loaded_ = false;
     bool initialized_ = false;
     
     void initOpenGL();

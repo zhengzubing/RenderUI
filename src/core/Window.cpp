@@ -5,8 +5,8 @@
 namespace Component {
 
 // Wayland 全局注册回调
-static void registryGlobal(void* data, wl_registry* registry,
-                           uint32_t name, const char* interface, uint32_t version) {
+void registryGlobal(void* data, wl_registry* registry,
+                    uint32_t name, const char* interface, uint32_t version) {
     Window* window = static_cast<Window*>(data);
     
     if (strcmp(interface, wl_compositor_interface.name) == 0) {
@@ -27,12 +27,7 @@ static const wl_registry_listener registryListener = {
     .global_remove = registryGlobalRemove
 };
 
-struct Window::Impl {
-    wl_compositor* compositor = nullptr;
-    xdg_wm_base* wmBase = nullptr;
-};
-
-Window::Window() : impl_(std::make_unique<Impl>()) {}
+Window::Window() = default;
 
 Window::~Window() {
     cleanup();
@@ -45,7 +40,7 @@ bool Window::create(const std::string& title, int width, int height) {
     // 连接 Wayland 显示器
     display_ = wl_display_connect(nullptr);
     if (!display_) {
-        LOG_ERROR << "Failed to connect to Wayland display";
+        LOG_E << "Failed to connect to Wayland display";
         return false;
     }
     
@@ -58,14 +53,14 @@ bool Window::create(const std::string& title, int width, int height) {
     wl_display_roundtrip(display_);
     
     if (!compositor_ || !wmBase_) {
-        LOG_ERROR << "Failed to get Wayland compositor or wm_base";
+        LOG_E << "Failed to get Wayland compositor or wm_base";
         cleanup();
         return false;
     }
     
     // 创建 Surface
     if (!surface_.create(compositor_, wmBase_)) {
-        LOG_ERROR << "Failed to create Wayland surface";
+        LOG_E << "Failed to create Wayland surface";
         cleanup();
         return false;
     }
@@ -75,7 +70,7 @@ bool Window::create(const std::string& title, int width, int height) {
     
     // 初始化 EGL
     if (!eglContext_.init(display_)) {
-        LOG_ERROR << "Failed to initialize EGL";
+        LOG_E << "Failed to initialize EGL";
         cleanup();
         return false;
     }
@@ -83,19 +78,19 @@ bool Window::create(const std::string& title, int width, int height) {
     // 创建 EGL 表面
     eglSurface_ = eglContext_.createSurface(surface_.getSurface(), width, height);
     if (eglSurface_ == EGL_NO_SURFACE) {
-        LOG_ERROR << "Failed to create EGL surface";
+        LOG_E << "Failed to create EGL surface";
         cleanup();
         return false;
     }
     
     // 激活 EGL 上下文
     if (!eglContext_.makeCurrent(eglSurface_)) {
-        LOG_ERROR << "Failed to make EGL context current";
+        LOG_E << "Failed to make EGL context current";
         cleanup();
         return false;
     }
     
-    LOG_INFO << "Window created: " << width << "x" << height;
+    LOG_I << "Window created: " << width << "x" << height;
     return true;
 }
 
@@ -103,14 +98,14 @@ void Window::show() {
     if (!visible_) {
         surface_.configure(width_, height_);
         visible_ = true;
-        LOG_INFO << "Window shown";
+        LOG_I << "Window shown";
     }
 }
 
 void Window::hide() {
     if (visible_) {
         visible_ = false;
-        LOG_INFO << "Window hidden";
+        LOG_I << "Window hidden";
     }
 }
 
@@ -141,14 +136,14 @@ void Window::cleanup() {
     eglContext_.cleanup();
     surface_.cleanup();
     
-    if (impl_->wmBase) {
-        xdg_wm_base_destroy(impl_->wmBase);
-        impl_->wmBase = nullptr;
+    if (wmBase_) {
+        xdg_wm_base_destroy(wmBase_);
+        wmBase_ = nullptr;
     }
     
-    if (impl_->compositor) {
-        wl_compositor_destroy(impl_->compositor);
-        impl_->compositor = nullptr;
+    if (compositor_) {
+        wl_compositor_destroy(compositor_);
+        compositor_ = nullptr;
     }
     
     if (display_) {
@@ -157,7 +152,7 @@ void Window::cleanup() {
     }
     
     visible_ = false;
-    LOG_DEBUG << "Window cleaned up";
+    LOG_D << "Window cleaned up";
 }
 
 } // namespace Component

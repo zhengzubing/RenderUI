@@ -1,5 +1,6 @@
 #include "EventDispatcher.hpp"
 #include "Logger.hpp"
+#include "EventLoop.hpp"
 
 namespace Component {
 
@@ -26,21 +27,13 @@ bool EventDispatcher::init() {
         dispatchTouchEvent(static_cast<const TouchEvent&>(event));
     });
     
-    EventLoop::instance().addHandler(EventType::KeyDown, [this](const Event& event) {
-        dispatchKeyEvent(static_cast<const KeyEvent&>(event));
-    });
-    
-    EventLoop::instance().addHandler(EventType::KeyUp, [this](const Event& event) {
-        dispatchKeyEvent(static_cast<const KeyEvent&>(event));
-    });
-    
-    LOG_INFO << "EventDispatcher initialized";
+    LOG_I << "EventDispatcher initialized";
     return true;
 }
 
 void EventDispatcher::setWidgetTree(WidgetTree* tree) {
     widgetTree_ = tree;
-    LOG_DEBUG << "WidgetTree set for event dispatching";
+    LOG_D << "WidgetTree set for event dispatching";
 }
 
 bool EventDispatcher::dispatchTouchEvent(const TouchEvent& event) {
@@ -62,7 +55,7 @@ bool EventDispatcher::dispatchTouchEvent(const TouchEvent& event) {
     // 从控件树中找到命中的控件
     auto targetWidget = widgetTree_->findWidgetAt(event.x, event.y);
     if (!targetWidget) {
-        LOG_VERBOSE << "No widget found at (" << event.x << ", " << event.y << ")";
+        LOG_V << "No widget found at (" << event.x << ", " << event.y << ")";
         return false;
     }
     
@@ -70,31 +63,15 @@ bool EventDispatcher::dispatchTouchEvent(const TouchEvent& event) {
     bool handled = targetWidget->handleTouchEvent(event);
     
     if (handled) {
-        LOG_DEBUG << "Touch event dispatched to widget: " << targetWidget->getId();
+        LOG_D << "Touch event dispatched to widget: " << targetWidget->getId();
     }
     
     return handled;
 }
 
-bool EventDispatcher::dispatchKeyEvent(const KeyEvent& event) {
-    // 首先通知监听器
-    auto it = listeners_.find(event.type);
-    if (it != listeners_.end()) {
-        for (auto& listener : it->second) {
-            if (listener(event)) {
-                return true;
-            }
-        }
-    }
-    
-    // TODO: 键盘事件派发（需要焦点系统）
-    LOG_DEBUG << "Key event received: keyCode=" << event.keyCode;
-    return false;
-}
-
 void EventDispatcher::addListener(EventType type, EventListener listener) {
     listeners_[type].push_back(std::move(listener));
-    LOG_DEBUG << "Event listener added for type: " << static_cast<int>(type);
+    LOG_D << "Event listener added for type: " << static_cast<int>(type);
 }
 
 } // namespace Component

@@ -5,6 +5,16 @@
 #include <memory>
 #include <cstdint>
 
+// 前向声明 Perfetto 类型
+namespace perfetto {
+    class TracingSession;
+}
+
+// 引入 Perfetto SDK 头文件
+#if ENABLE_PERFETTO
+#include <perfetto.h>
+#endif
+
 namespace RenderUI {
 
 /**
@@ -63,8 +73,9 @@ public:
     bool isTracing() const { return tracingActive_; }
 
 private:
-    PerfettoTracker();
-    ~PerfettoTracker();
+    // 私有构造函数和拷贝控制，防止误用
+    PerfettoTracker() = default;
+    ~PerfettoTracker() = default;
     PerfettoTracker(const PerfettoTracker&) = delete;
     PerfettoTracker& operator=(const PerfettoTracker&) = delete;
     
@@ -73,9 +84,8 @@ private:
     uint32_t maxBufferSizeMB_ = 64;
     uint32_t durationMs_ = 30000;
     
-    // Perfetto 内部状态 (使用 Pimpl 隐藏实现细节)
-    struct Impl;
-    std::unique_ptr<Impl> impl_;
+    // Perfetto 资源
+    std::unique_ptr<perfetto::TracingSession> tracingSession_;
 };
 
 /**
@@ -100,8 +110,7 @@ public:
     ~PerfettoScope();
     
 private:
-    struct Impl;
-    Impl* impl_;
+    const char* name_;
 };
 
 /**

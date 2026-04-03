@@ -48,25 +48,25 @@ private:
 } // namespace Component
 
 // 便捷宏定义（避免与 plog 冲突）
-#ifdef LOG_DEBUG
-#undef LOG_DEBUG
+#ifdef LOG_D
+#undef LOG_D
 #endif
-#ifdef LOG_INFO
-#undef LOG_INFO
+#ifdef LOG_I
+#undef LOG_I
 #endif
-#ifdef LOG_WARNING
-#undef LOG_WARNING
+#ifdef LOG_W
+#undef LOG_W
 #endif
-#ifdef LOG_ERROR
-#undef LOG_ERROR
+#ifdef LOG_E
+#undef LOG_E
 #endif
-#ifdef LOG_VERBOSE
-#undef LOG_VERBOSE
+#ifdef LOG_V
+#undef LOG_V
 #endif
 
 // plog 使用流式语法，但为了代码简洁，我们封装为宏
-#define LOG_DEBUG PLOG_DEBUG
-#define LOG_INFO PLOG_INFO
-#define LOG_WARNING PLOG_WARNING
-#define LOG_ERROR PLOG_ERROR
-#define LOG_VERBOSE PLOG_VERBOSE
+#define LOG_D PLOG_DEBUG
+#define LOG_I PLOG_INFO
+#define LOG_W PLOG_WARNING
+#define LOG_E PLOG_ERROR
+#define LOG_V PLOG_VERBOSE

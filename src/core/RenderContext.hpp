@@ -57,8 +57,11 @@ public:
     void cleanup();
     
 private:
-    struct Impl;
-    std::unique_ptr<Impl> impl_;
+    EGLDisplay display_ = EGL_NO_DISPLAY;
+    EGLSurface surface_ = EGL_NO_SURFACE;
+    cairo_t* cairo_ = nullptr;
+    cairo_surface_t* cairoSurface_ = nullptr;
+    bool initialized_ = false;
 };
 
 /**

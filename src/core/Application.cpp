@@ -12,30 +12,19 @@
 
 namespace Component {
 
-struct Application::Impl {
-    bool running = false;
-    std::string title;
-    int width = 0;
-    int height = 0;
-    
-    Window* window = nullptr;
-    RenderContext renderContext;
-};
-
 std::shared_ptr<Application> Application::instance() {
     static auto instance = std::make_shared<Application>();
     return instance;
 }
 
 bool Application::init(const std::string& title, int width, int height) {
-    impl_ = std::make_unique<Impl>();
-    impl_->title = title;
-    impl_->width = width;
-    impl_->height = height;
+    title_ = title;
+    width_ = width;
+    height_ = height;
     
     // 初始化日志系统
     Logger::instance().init(plog::info, "renderui.log");
-    LOG_INFO << "Application initializing: " << title << " " << width << "x" << height;
+    LOG_I << "Application initializing: " << title << " " << width << "x" << height;
     
     // 初始化应用上下文
     ApplicationContext::instance().init();
@@ -53,52 +42,52 @@ bool Application::init(const std::string& title, int width, int height) {
     EventDispatcher::instance().init();
     
     // 创建主窗口
-    impl_->window = WindowManager::instance().createMainWindow(title, width, height);
-    if (!impl_->window) {
-        LOG_ERROR << "Failed to create main window";
+    window_ = WindowManager::instance().createMainWindow(title, width, height);
+    if (!window_) {
+        LOG_E << "Failed to create main window";
         return false;
     }
     
     // 初始化渲染上下文
-    if (!impl_->renderContext.init(impl_->window->getEglDisplay(), impl_->window->getEglSurface())) {
-        LOG_ERROR << "Failed to initialize render context";
+    if (!renderContext_.init(window_->getEglDisplay(), window_->getEglSurface())) {
+        LOG_E << "Failed to initialize render context";
         return false;
     }
     
     // 显示窗口
-    impl_->window->show();
+    window_->show();
     
-    LOG_INFO << "Application initialized successfully";
+    LOG_I << "Application initialized successfully";
     return true;
 }
 
 int Application::run() {
-    if (!impl_ || !impl_->window) {
-        LOG_ERROR << "Application not initialized";
+    if (!window_) {
+        LOG_E << "Application not initialized";
         return -1;
     }
     
-    impl_->running = true;
-    LOG_INFO << "Application main loop started";
+    running_ = true;
+    LOG_I << "Application main loop started";
     
     // 主循环
     auto lastFrameTime = std::chrono::steady_clock::now();
     const auto frameDuration = std::chrono::milliseconds(16); // ~60 FPS
     
-    while (impl_->running) {
+    while (running_) {
         auto frameStart = std::chrono::steady_clock::now();
         
         // 处理 Wayland 事件
-        impl_->window->dispatchEvents();
+        window_->dispatchEvents();
         
         // 开始渲染
-        impl_->renderContext.beginFrame();
+        renderContext_.beginFrame();
         
         // 渲染调试信息（FPS 等）
         DebugMenu::instance().render();
         
         // 结束渲染（交换缓冲区）
-        impl_->renderContext.endFrame();
+        renderContext_.endFrame();
         
         // 更新 FPS
         ApplicationContext::instance().updateFps();
@@ -112,26 +101,24 @@ int Application::run() {
         }
     }
     
-    LOG_INFO << "Application main loop ended";
+    LOG_I << "Application main loop ended";
     return 0;
 }
 
 void Application::quit() {
-    impl_->running = false;
-    LOG_INFO << "Application quit requested";
+    running_ = false;
+    LOG_I << "Application quit requested";
 }
 
 void Application::shutdown() {
-    LOG_INFO << "Application shutting down";
+    LOG_I << "Application shutting down";
     
-    impl_->renderContext.cleanup();
+    renderContext_.cleanup();
     WindowManager::instance().cleanup();
     EventLoop::instance().cleanup();
     ApplicationContext::instance().cleanup();
     
-    impl_.reset();
-    
-    LOG_INFO << "Application shutdown complete";
+    LOG_I << "Application shutdown complete";
 }
 
 } // namespace Component

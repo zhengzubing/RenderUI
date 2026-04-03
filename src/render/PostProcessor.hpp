@@ -127,14 +127,16 @@ public:
     void cleanup();
     
 private:
-    struct Impl;
-    std::unique_ptr<Impl> impl_;
-    
     GLuint fbo_ = 0;
     GLuint texture_ = 0;
     GLuint rbo_ = 0;  // Renderbuffer
     
     GLuint shaderProgram_ = 0;
+    int uCornerRadiusLoc_ = -1;
+    int uShadowOffsetLoc_ = -1;
+    int uBrightnessLoc_ = -1;
+    int uContrastLoc_ = -1;
+    
     int width_ = 0;
     int height_ = 0;
     

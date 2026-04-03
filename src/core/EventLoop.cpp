@@ -19,18 +19,18 @@ bool EventLoop::init() {
     handlers_.clear();
     
     initialized_ = true;
-    LOG_INFO << "EventLoop initialized";
+    LOG_I << "EventLoop initialized";
     return true;
 }
 
 void EventLoop::run() {
     if (!initialized_) {
-        LOG_ERROR << "EventLoop not initialized";
+        LOG_E << "EventLoop not initialized";
         return;
     }
     
     running_ = true;
-    LOG_INFO << "EventLoop started";
+    LOG_I << "EventLoop started";
     
     while (running_) {
         // 处理事件队列中的事件
@@ -52,12 +52,12 @@ void EventLoop::run() {
         }
     }
     
-    LOG_INFO << "EventLoop stopped";
+    LOG_I << "EventLoop stopped";
 }
 
 void EventLoop::quit() {
     running_ = false;
-    LOG_DEBUG << "EventLoop quit requested";
+    LOG_D << "EventLoop quit requested";
 }
 
 void EventLoop::postEvent(std::unique_ptr<Event> event) {
@@ -73,7 +73,7 @@ void EventLoop::postEvent(std::unique_ptr<Event> event) {
 
 void EventLoop::addHandler(EventType type, EventHandler handler) {
     handlers_[type] = std::move(handler);
-    LOG_DEBUG << "Event handler added for type: " << static_cast<int>(type);
+    LOG_D << "Event handler added for type: " << static_cast<int>(type);
 }
 
 void EventLoop::processEvent(const Event& event) {
@@ -96,7 +96,7 @@ void EventLoop::cleanup() {
     
     handlers_.clear();
     initialized_ = false;
-    LOG_DEBUG << "EventLoop cleaned up";
+    LOG_D << "EventLoop cleaned up";
 }
 
 } // namespace Component

@@ -1,21 +1,17 @@
 #include "WidgetTree.hpp"
+#include "Container.hpp"
 #include "Logger.hpp"
 #include <algorithm>
 
 namespace Component {
 
-struct WidgetTree::Impl {
-    int screenWidth = 1920;
-    int screenHeight = 1080;
-};
-
-WidgetTree::WidgetTree() : impl_(std::make_unique<Impl>()) {}
+WidgetTree::WidgetTree() = default;
 
 WidgetTree::~WidgetTree() = default;
 
 void WidgetTree::addRoot(std::shared_ptr<Widget> widget, const std::string& id) {
     if (!widget) {
-        LOG_ERROR << "Cannot add null widget as root";
+        LOG_E << "Cannot add null widget as root";
         return;
     }
     
@@ -29,19 +25,19 @@ void WidgetTree::addRoot(std::shared_ptr<Widget> widget, const std::string& id) 
     roots_.push_back(node);
     widgetMap_[id] = node;
     
-    LOG_DEBUG << "Root widget added: " << id;
+    LOG_D << "Root widget added: " << id;
 }
 
 void WidgetTree::addChild(const std::string& parentId, std::shared_ptr<Widget> widget, 
                           const std::string& childId) {
     if (!widget) {
-        LOG_ERROR << "Cannot add null widget as child";
+        LOG_E << "Cannot add null widget as child";
         return;
     }
     
     auto parentNode = findNode(parentId);
     if (!parentNode) {
-        LOG_ERROR << "Parent widget not found: " << parentId;
+        LOG_E << "Parent widget not found: " << parentId;
         return;
     }
     
@@ -56,13 +52,50 @@ void WidgetTree::addChild(const std::string& parentId, std::shared_ptr<Widget> w
     parentNode->children.push_back(childNode);
     widgetMap_[childId] = childNode;
     
-    LOG_DEBUG << "Child widget added: " << parentId << " -> " << childId;
+    LOG_D << "Child widget added: " << parentId << " -> " << childId;
+}
+
+void WidgetTree::addToContainer(const std::string& containerId, 
+                                 std::shared_ptr<Widget> widget, 
+                                 const std::string& widgetId) {
+    if (!widget) {
+        LOG_E << "Cannot add null widget to container";
+        return;
+    }
+    
+    auto containerNode = findNode(containerId);
+    if (!containerNode) {
+        LOG_E << "Container widget not found: " << containerId;
+        return;
+    }
+    
+    // 检查是否是 Container 类型
+    auto container = std::dynamic_pointer_cast<Container>(containerNode->widget);
+    if (!container) {
+        LOG_E << "Widget is not a Container: " << containerId;
+        return;
+    }
+    
+    // 通过 Container 的 Add 方法添加
+    container->Add(widget, widgetId);
+    
+    // 同时在 WidgetTree 中注册
+    auto widgetNode = std::make_shared<WidgetNode>();
+    widgetNode->widget = widget;
+    widgetNode->id = widgetId;
+    widgetNode->parent = containerNode;
+    widgetNode->zIndex = containerNode->children.size();
+    
+    containerNode->children.push_back(widgetNode);
+    widgetMap_[widgetId] = widgetNode;
+    
+    LOG_D << "Widget added to container: " << containerId << " -> " << widgetId;
 }
 
 void WidgetTree::removeWidget(const std::string& id) {
     auto it = widgetMap_.find(id);
     if (it == widgetMap_.end()) {
-        LOG_WARNING << "Widget not found: " << id;
+        LOG_W << "Widget not found: " << id;
         return;
     }
     
@@ -90,7 +123,7 @@ void WidgetTree::removeWidget(const std::string& id) {
     }
     
     widgetMap_.erase(it);
-    LOG_DEBUG << "Widget removed: " << id;
+    LOG_D << "Widget removed: " << id;
 }
 
 std::shared_ptr<Widget> WidgetTree::getWidget(const std::string& id) {
@@ -113,11 +146,8 @@ std::shared_ptr<Widget> WidgetTree::findWidgetAt(float x, float y) {
 }
 
 void WidgetTree::updateLayout(int screenWidth, int screenHeight) {
-    impl_->screenWidth = screenWidth;
-    impl_->screenHeight = screenHeight;
-    
     // TODO: 实现布局计算
-    LOG_DEBUG << "Layout updated: " << screenWidth << "x" << screenHeight;
+    LOG_D << "Layout updated: " << screenWidth << "x" << screenHeight;
 }
 
 void WidgetTree::render(RenderContext& ctx) {
@@ -136,7 +166,7 @@ void WidgetTree::markAllDirty() {
     for (auto& root : roots_) {
         markNodeDirty(root);
     }
-    LOG_DEBUG << "All widgets marked dirty";
+    LOG_D << "All widgets marked dirty";
 }
 
 std::shared_ptr<WidgetNode> WidgetTree::findNode(const std::string& id) {
@@ -167,8 +197,10 @@ bool WidgetTree::renderNode(RenderContext& ctx, const std::shared_ptr<WidgetNode
     return true;
 }
 
-std::shared_ptr<Widget> WidgetTree::findWidgetAtInNode(const std::shared_ptr<WidgetNode>& node, 
-                                                        float x, float y) {
+std::shared_ptr<Widget> WidgetTree::findWidgetAtInNode(
+    const std::shared_ptr<WidgetNode>& node, 
+    float x, float y) {
+    
     if (!node || !node->widget) {
         return nullptr;
     }
@@ -178,23 +210,21 @@ std::shared_ptr<Widget> WidgetTree::findWidgetAtInNode(const std::shared_ptr<Wid
         return nullptr;
     }
     
-    // 检查坐标是否在控件内
+    // 1. 先递归检查所有子控件（无论父控件是否在范围内）
+    for (auto it = node->children.rbegin(); it != node->children.rend(); ++it) {
+        auto childWidget = findWidgetAtInNode(*it, x, y);
+        if (childWidget) {
+            return childWidget;  // 子控件被点击，直接返回
+        }
+    }
+    
+    // 2. 再检查父控件本身
     auto pos = widget->getPosition();
     auto size = widget->getSize();
     
     if (x >= pos.x && x <= pos.x + size.width &&
         y >= pos.y && y <= pos.y + size.height) {
-        
-        // 先检查子节点
-        for (auto it = node->children.rbegin(); it != node->children.rend(); ++it) {
-            auto childWidget = findWidgetAtInNode(*it, x, y);
-            if (childWidget) {
-                return childWidget;
-            }
-        }
-        
-        // 返回当前控件
-        return widget;
+        return widget;  // 父控件被点击
     }
     
     return nullptr;
@@ -205,8 +235,10 @@ void WidgetTree::markNodeDirty(const std::shared_ptr<WidgetNode>& node) {
         return;
     }
     
-    node->widget->markDirty();
+    // 标记当前控件为脏
+    node->widget->setVisible(true);  // 触发更新
     
+    // 递归标记子节点
     for (auto& child : node->children) {
         markNodeDirty(child);
     }

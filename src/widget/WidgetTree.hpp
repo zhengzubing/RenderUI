@@ -15,7 +15,7 @@ namespace Component {
  */
 struct WidgetNode {
     std::shared_ptr<Widget> widget;
-    std::shared_ptr<WidgetNode> parent;
+    std::weak_ptr<WidgetNode> parent;
     std::vector<std::shared_ptr<WidgetNode>> children;
     
     std::string id;
@@ -38,7 +38,12 @@ public:
     void addRoot(std::shared_ptr<Widget> widget, const std::string& id);
     
     /**
-     * @brief 添加子控件
+     * @brief 添加到容器（支持 Container 类型）
+     */
+    void addToContainer(const std::string& containerId, std::shared_ptr<Widget> widget, const std::string& widgetId);
+    
+    /**
+     * @brief 添加子控件（旧接口，兼容用）
      */
     void addChild(const std::string& parentId, std::shared_ptr<Widget> widget, const std::string& childId);
     
@@ -83,6 +88,8 @@ private:
     
     std::shared_ptr<WidgetNode> findNode(const std::string& id);
     bool renderNode(RenderContext& ctx, const std::shared_ptr<WidgetNode>& node);
+    std::shared_ptr<Widget> findWidgetAtInNode(const std::shared_ptr<WidgetNode>& node, float x, float y);
+    void markNodeDirty(const std::shared_ptr<WidgetNode>& node);
 };
 
 } // namespace Component

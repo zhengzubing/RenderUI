@@ -1,7 +1,17 @@
 #include "PerfettoTracker.hpp"
-#include "core/Logger.hpp"
-#include <perfetto/perfetto.h>
+#include "Logger.hpp"
 #include <fstream>
+
+// 引入 Perfetto SDK
+#if ENABLE_PERFETTO
+#include <perfetto.h>
+using namespace perfetto;
+#endif
+
+// 注意：Perfetto 功能已禁用，ENABLE_PERFETTO=OFF
+// 以下代码需要 perfetto 库支持
+
+#if ENABLE_PERFETTO
 
 namespace RenderUI {
 
@@ -11,13 +21,7 @@ PERFETTO_TRACK_EVENT_STATIC_STORAGE();
 // 异步操作追踪映射
 static std::map<uint64_t, perfetto::Track> g_asyncTracks;
 
-struct PerfettoTracker::Impl {
-    std::unique_ptr<perfetto::TracingSession> tracingSession;
-    bool isInitialized = false;
-};
-
-PerfettoTracker::PerfettoTracker() : impl_(std::make_unique<Impl>()) {
-}
+PerfettoTracker::PerfettoTracker() : initialized_(false), tracingActive_(false) {}
 
 PerfettoTracker::~PerfettoTracker() {
     if (tracingActive_) {
@@ -57,7 +61,6 @@ bool PerfettoTracker::init(uint32_t maxBufferSizeMB, uint32_t durationMs) {
     // 启用 Chrome 风格的追踪
     cfg->set_trace_packet_mode(perfetto::protos::gen::DataSourceConfig::TRACE_PACKET_MODE_STREAMING);
     
-    impl_->isInitialized = true;
     initialized_ = true;
     
     LOGI("Perfetto initialized: buffer=%uMB, duration=%ums", 
@@ -78,8 +81,8 @@ bool PerfettoTracker::startTracing() {
     }
     
     // 创建追踪会话
-    impl_->tracingSession = perfetto::NewTracingSession();
-    if (!impl_->tracingSession) {
+    tracingSession_ = perfetto::NewTracingSession();
+    if (!tracingSession_) {
         LOGE("Failed to create Perfetto tracing session");
         return false;
     }
@@ -93,8 +96,8 @@ bool PerfettoTracker::startTracing() {
     cfg->set_name("track_event");
     
     // 启动追踪
-    impl_->tracingSession->Setup(traceConfig);
-    impl_->tracingSession->Start();
+    tracingSession_->Setup(traceConfig);
+    tracingSession_->Start();
     
     tracingActive_ = true;
     LOGI("Perfetto tracing started");
@@ -103,28 +106,28 @@ bool PerfettoTracker::startTracing() {
 }
 
 void PerfettoTracker::stopTracing() {
-    if (!tracingActive_ || !impl_->tracingSession) {
+    if (!tracingActive_ || !tracingSession_) {
         return;
     }
     
     LOGI("Stopping Perfetto tracing...");
     
     // 停止追踪并等待数据刷新
-    impl_->tracingSession->Stop();
-    impl_->tracingSession->FlushBlocking();
+    tracingSession_->Stop();
+    tracingSession_->FlushBlocking();
     
     tracingActive_ = false;
     LOGI("Perfetto tracing stopped");
 }
 
 bool PerfettoTracker::exportTrace(const std::string& filePath) {
-    if (!impl_->tracingSession) {
+    if (!tracingSession_) {
         LOGE("No tracing session to export");
         return false;
     }
     
     // 读取追踪数据
-    auto traceData = impl_->tracingSession->ReadTraceBlocking();
+    auto traceData = tracingSession_->ReadTraceBlocking();
     if (traceData.empty()) {
         LOGE("Empty trace data");
         return false;
@@ -145,17 +148,13 @@ bool PerfettoTracker::exportTrace(const std::string& filePath) {
 }
 
 // PerfettoScope 实现
-struct PerfettoScope::Impl {
-    perfetto::TrackEvent::LegacyScope scope;
-};
-
-PerfettoScope::PerfettoScope(const char* name) : impl_(new Impl()) {
-    PERFETTO_TRACK_EVENT(TRACE_EVENT_CATEGORY_GROUP_ENABLED, "perfetto", "track_event");
-    impl_->scope = perfetto::TrackEvent::LegacyScope(name);
+PerfettoScope::PerfettoScope(const char* name) : name_(name) {
+    // 使用新 API 记录瞬时事件（自动作用域）
+    PERFETTO_TRACE_EVENT(name_);
 }
 
 PerfettoScope::~PerfettoScope() {
-    delete impl_;
+    // 析构时自动结束追踪（通过 RAII）
 }
 
 // 异步追踪函数
@@ -179,3 +178,24 @@ void perfettoTrackCounter(const char* name, int64_t value) {
 }
 
 } // namespace RenderUI
+
+#else
+
+// ENABLE_PERFETTO=OFF 时的空实现
+namespace RenderUI {
+
+bool PerfettoTracker::init(uint32_t, uint32_t) { return false; }
+bool PerfettoTracker::startTracing() { return false; }
+void PerfettoTracker::stopTracing() {}
+bool PerfettoTracker::exportTrace(const std::string&) { return false; }
+
+PerfettoScope::PerfettoScope(const char*) {}
+PerfettoScope::~PerfettoScope() = default;
+
+void perfettoTrackAsyncBegin(const char*, uint64_t) {}
+void perfettoTrackAsyncEnd(const char*, uint64_t) {}
+void perfettoTrackCounter(const char*, int64_t) {}
+
+} // namespace RenderUI
+
+#endif

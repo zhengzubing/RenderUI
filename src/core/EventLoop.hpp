@@ -38,16 +38,6 @@ struct Event {
 };
 
 /**
- * @brief 键盘事件
- */
-struct KeyEvent : public Event {
-    uint32_t keyCode = 0;
-    uint32_t modifiers = 0;  // Shift, Ctrl, Alt
-    
-    KeyEvent() { type = EventType::KeyDown; }
-};
-
-/**
  * @brief 触摸事件
  */
 struct TouchEvent : public Event {

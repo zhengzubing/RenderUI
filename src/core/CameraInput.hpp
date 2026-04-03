@@ -69,8 +69,9 @@ public:
     void setConfig(const Config& config);
     
 private:
-    struct Impl;
-    std::unique_ptr<Impl> impl_;
+    int fd_ = -1;  // V4L2 设备文件描述符
+    std::vector<void*> buffers_;  // 内存映射缓冲区
+    size_t numBuffers_ = 4;
     
     Config config_;
     FrameCallback callback_;

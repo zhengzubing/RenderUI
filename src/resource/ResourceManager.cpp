@@ -16,7 +16,7 @@ ResourceManager::~ResourceManager() {
 bool ResourceManager::init(const std::string& resourceDir) {
     std::lock_guard<std::mutex> lock(mutex_);
     resourceDir_ = resourceDir;
-    LOG_INFO("ResourceManager initialized: %s", resourceDir.c_str());
+    LOG_I << "ResourceManager initialized: " << resourceDir;
     return true;
 }
 
@@ -28,7 +28,7 @@ cairo_surface_t* ResourceManager::loadImage(const std::string& path) {
     if (it != resources_.end()) {
         it->second->lastAccessTime = std::chrono::steady_clock::now();
         it->second->accessCount++;
-        LOG_DEBUG << "Image cache hit: " << path;
+        LOG_D << "Image cache hit: " << path;
         return it->second->surface;
     }
     
@@ -38,7 +38,7 @@ cairo_surface_t* ResourceManager::loadImage(const std::string& path) {
     // 加载图片
     cairo_surface_t* surface = loadFromFile(fullPath);
     if (!surface) {
-        LOG_ERROR << "Failed to load image: " << path;
+        LOG_E << "Failed to load image: " << path;
         return nullptr;
     }
     
@@ -51,7 +51,7 @@ cairo_surface_t* ResourceManager::loadImage(const std::string& path) {
     info->lastAccessTime = std::chrono::steady_clock::now();
     info->accessCount = 1;
     
-    LOG_INFO << "Image loaded: " << path << " (" << cairo_image_surface_get_width(surface) << "x" << cairo_image_surface_get_height(surface) << ", " << info->memorySize / 1024 << " KB)";
+    LOG_I << "Image loaded: " << path << " (" << cairo_image_surface_get_width(surface) << "x" << cairo_image_surface_get_height(surface) << ", " << info->memorySize / 1024 << " KB)";
     
     cairo_surface_t* result = info->surface;
     resources_[path] = std::move(info);
@@ -81,7 +81,7 @@ void ResourceManager::unloadImage(const std::string& path) {
             cairo_surface_destroy(it->second->surface);
         }
         resources_.erase(it);
-        LOG_DEBUG << "Image unloaded: " << path;
+        LOG_D << "Image unloaded: " << path;
     }
 }
 
@@ -102,11 +102,11 @@ void ResourceManager::cleanupUnused(int ttlSeconds) {
     
     for (const auto& path : toRemove) {
         unloadImage(path);
-        LOG_INFO("Cleaned up unused resource: %s", path.c_str());
+        LOG_I << "Cleaned up unused resource: " << path;
     }
     
     if (!toRemove.empty()) {
-        LOG_INFO("Cleaned up %zu unused resources", toRemove.size());
+        LOG_I << "Cleaned up " << toRemove.size() << " unused resources";
     }
 }
 
@@ -135,7 +135,7 @@ void ResourceManager::clearAll() {
     }
     resources_.clear();
     
-    LOG_INFO("All resources cleared");
+    LOG_I << "All resources cleared";
 }
 
 cairo_surface_t* ResourceManager::loadFromFile(const std::string& fullPath) {
@@ -144,7 +144,7 @@ cairo_surface_t* ResourceManager::loadFromFile(const std::string& fullPath) {
     
     unsigned char* data = stbi_load(fullPath.c_str(), &width, &height, &channels, 4);
     if (!data) {
-        LOG_ERROR << "stb_image failed to load: " << fullPath;
+        LOG_E << "stb_image failed to load: " << fullPath;
         return nullptr;
     }
     
@@ -152,7 +152,7 @@ cairo_surface_t* ResourceManager::loadFromFile(const std::string& fullPath) {
     cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
     if (!surface) {
         stbi_image_free(data);
-        LOG_ERROR << "Failed to create Cairo surface: " << width << "x" << height;
+        LOG_E << "Failed to create Cairo surface: " << width << "x" << height;
         return nullptr;
     }
     

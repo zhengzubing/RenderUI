@@ -1,94 +1,30 @@
 #include "PostProcessor.hpp"
 #include "Logger.hpp"
 #include <GLES2/gl2ext.h>
+#include <fstream>
+#include <sstream>
 
 namespace Component {
 
-// 基础 Vertex Shader
-static const char* sVertexShader = R"(
-    attribute vec2 aPosition;
-    attribute vec2 aTexCoord;
-    varying vec2 vTexCoord;
+// Shader 文件路径
+static const std::string sShaderPath = "shaders/";
+
+// 从文件加载 Shader 源码
+static std::string loadShaderSource(const std::string& filename) {
+    std::string fullPath = sShaderPath + filename;
+    std::ifstream file(fullPath);
     
-    void main() {
-        gl_Position = vec4(aPosition, 0.0, 1.0);
-        vTexCoord = aTexCoord;
+    if (!file.is_open()) {
+        LOG_E << "Failed to open shader file: " << fullPath;
+        return "";
     }
-)";
-
-// 圆角 Fragment Shader
-static const char* sFragmentRounded = R"(
-    precision mediump float;
-    varying vec2 vTexCoord;
-    uniform sampler2D uTexture;
-    uniform float uCornerRadius;
-    uniform vec2 uResolution;
     
-    void main() {
-        vec2 uv = vTexCoord;
-        vec2 center = uv - 0.5;
-        float dist = length(center);
-        
-        // 简单的圆角算法
-        if (dist > 0.5 - uCornerRadius) {
-            float alpha = 1.0 - smoothstep(0.5 - uCornerRadius, 0.5 - uCornerRadius + 0.01, dist);
-            gl_FragColor = texture2D(uTexture, uv) * vec4(1.0, 1.0, 1.0, alpha);
-        } else {
-            gl_FragColor = texture2D(uTexture, uv);
-        }
-    }
-)";
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
+}
 
-// 阴影 Fragment Shader
-static const char* sFragmentShadow = R"(
-    precision mediump float;
-    varying vec2 vTexCoord;
-    uniform sampler2D uTexture;
-    uniform vec2 uShadowOffset;
-    uniform float uShadowBlur;
-    
-    void main() {
-        vec4 color = texture2D(uTexture, vTexCoord);
-        
-        // 简化阴影：降低亮度并偏移
-        vec4 shadowColor = texture2D(uTexture, vTexCoord - uShadowOffset);
-        shadowColor.rgb *= 0.3;  // 暗化
-        shadowColor.a *= uShadowBlur;
-        
-        gl_FragColor = color + shadowColor;
-    }
-)";
-
-// 颜色调整 Fragment Shader
-static const char* sFragmentColorAdjust = R"(
-    precision mediump float;
-    varying vec2 vTexCoord;
-    uniform sampler2D uTexture;
-    uniform float uBrightness;
-    uniform float uContrast;
-    
-    void main() {
-        vec4 color = texture2D(uTexture, vTexCoord);
-        
-        // 亮度调整
-        color.rgb += (uBrightness - 1.0);
-        
-        // 对比度调整
-        color.rgb = (color.rgb - 0.5) * uContrast + 0.5;
-        
-        gl_FragColor = color;
-    }
-)";
-
-struct PostProcessor::Impl {
-    GLuint shaderProgram = 0;
-    int uCornerRadiusLoc = -1;
-    int uShadowOffsetLoc = -1;
-    int uBrightnessLoc = -1;
-    int uContrastLoc = -1;
-};
-
-PostProcessor::PostProcessor() : impl_(std::make_unique<Impl>()) {}
+PostProcessor::PostProcessor() = default;
 
 PostProcessor::~PostProcessor() {
     cleanup();
@@ -102,11 +38,10 @@ bool PostProcessor::init(int width, int height) {
     width_ = width;
     height_ = height;
     
-    // 创建 FBO
+    // FBO creation
     glGenFramebuffers(1, &fbo_);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
     
-    // 创建纹理
     glGenTextures(1, &texture_);
     glBindTexture(GL_TEXTURE_2D, texture_);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, 
@@ -117,36 +52,44 @@ bool PostProcessor::init(int width, int height) {
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 
                            GL_TEXTURE_2D, texture_, 0);
     
-    // 创建 Renderbuffer（深度/模板）
     glGenRenderbuffers(1, &rbo_);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo_);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_STENCIL, width, height);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8_OES, width, height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
                                GL_RENDERBUFFER, rbo_);
     
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        LOG_ERROR << "FBO is not complete";
+        LOG_E << "FBO is not complete";
         cleanup();
         return false;
     }
     
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     
-    // 编译 Shader（使用圆角 Shader 作为默认）
-    if (!createShader(sVertexShader, sFragmentRounded)) {
-        LOG_ERROR << "Failed to create shader";
+    // 从文件加载 Shader（使用圆角 Shader 作为默认）
+    std::string vertexSource = loadShaderSource("postprocessor_vertex.glsl");
+    std::string fragmentSource = loadShaderSource("postprocessor_rounded.glsl");
+    
+    if (vertexSource.empty() || fragmentSource.empty()) {
+        LOG_E << "Failed to load shader sources";
+        cleanup();
+        return false;
+    }
+    
+    if (!createShader(vertexSource.c_str(), fragmentSource.c_str())) {
+        LOG_E << "Failed to create shader";
         cleanup();
         return false;
     }
     
     // 获取 Uniform 位置
-    impl_->uCornerRadiusLoc = glGetUniformLocation(shaderProgram_, "uCornerRadius");
-    impl_->uShadowOffsetLoc = glGetUniformLocation(shaderProgram_, "uShadowOffset");
-    impl_->uBrightnessLoc = glGetUniformLocation(shaderProgram_, "uBrightness");
-    impl_->uContrastLoc = glGetUniformLocation(shaderProgram_, "uContrast");
+    uCornerRadiusLoc_ = glGetUniformLocation(shaderProgram_, "uCornerRadius");
+    uShadowOffsetLoc_ = glGetUniformLocation(shaderProgram_, "uShadowOffset");
+    uBrightnessLoc_ = glGetUniformLocation(shaderProgram_, "uBrightness");
+    uContrastLoc_ = glGetUniformLocation(shaderProgram_, "uContrast");
     
     initialized_ = true;
-    LOG_INFO << "PostProcessor initialized: " << width << "x" << height;
+    LOG_I << "PostProcessor initialized: " << width << "x" << height;
     
     return true;
 }
@@ -186,7 +129,7 @@ void PostProcessor::applyRoundedCorners(float radius) {
     if (!initialized_) return;
     
     glUseProgram(shaderProgram_);
-    glUniform1f(impl_->uCornerRadiusLoc, radius);
+    glUniform1f(uCornerRadiusLoc_, radius);
     
     // TODO: 绘制带纹理的四边形
 }
@@ -195,29 +138,29 @@ void PostProcessor::applyShadow(float blur, float offset) {
     if (!initialized_) return;
     
     glUseProgram(shaderProgram_);
-    glUniform2f(impl_->uShadowOffsetLoc, offset, offset);
+    glUniform2f(uShadowOffsetLoc_, offset, offset);
     
     // TODO: 绘制带阴影的四边形
 }
 
 void PostProcessor::applyBlur(float radius) {
     // TODO: 实现高斯模糊（需要多 pass）
-    LOG_DEBUG << "Blur effect requested: " << radius;
+    LOG_D << "Blur effect requested: " << radius;
 }
 
 void PostProcessor::applyColorAdjust(float brightness, float contrast) {
     if (!initialized_) return;
     
     glUseProgram(shaderProgram_);
-    glUniform1f(impl_->uBrightnessLoc, brightness);
-    glUniform1f(impl_->uContrastLoc, contrast);
+    glUniform1f(uBrightnessLoc_, brightness);
+    glUniform1f(uContrastLoc_, contrast);
     
     // TODO: 绘制带颜色调整的四边形
 }
 
 void PostProcessor::applyGrayscale() {
     // TODO: 实现灰度效果
-    LOG_DEBUG << "Grayscale effect applied";
+    LOG_D << "Grayscale effect applied";
 }
 
 void PostProcessor::resize(int width, int height) {
@@ -258,13 +201,12 @@ bool PostProcessor::createShader(const char* vertexSource, const char* fragmentS
     glShaderSource(vertexShader, 1, &vertexSource, nullptr);
     glCompileShader(vertexShader);
     
-    // 检查编译状态
     GLint success;
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
     if (!success) {
         char infoLog[512];
         glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
-        LOG_ERROR << "Vertex shader compilation failed: " << infoLog;
+        LOG_E << "Vertex shader compilation failed: " << infoLog;
         return false;
     }
     
@@ -276,7 +218,7 @@ bool PostProcessor::createShader(const char* vertexSource, const char* fragmentS
     if (!success) {
         char infoLog[512];
         glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
-        LOG_ERROR << "Fragment shader compilation failed: " << infoLog;
+        LOG_E << "Fragment shader compilation failed: " << infoLog;
         return false;
     }
     
@@ -289,7 +231,7 @@ bool PostProcessor::createShader(const char* vertexSource, const char* fragmentS
     if (!success) {
         char infoLog[512];
         glGetProgramInfoLog(shaderProgram_, 512, nullptr, infoLog);
-        LOG_ERROR << "Shader program linking failed: " << infoLog;
+        LOG_E << "Shader program linking failed: " << infoLog;
         return false;
     }
     

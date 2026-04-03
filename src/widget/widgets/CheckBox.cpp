@@ -1,5 +1,6 @@
 #include "widgets/CheckBox.hpp"
 #include "RenderContext.hpp"
+#include "EventLoop.hpp"
 
 namespace Component {
 

@@ -5,95 +5,87 @@
 
 namespace Component {
 
-struct RenderContext::Impl {
-    EGLDisplay display = EGL_NO_DISPLAY;
-    EGLSurface surface = EGL_NO_SURFACE;
-    cairo_t* cairo = nullptr;
-    cairo_surface_t* cairoSurface = nullptr;
-    bool initialized = false;
-};
-
-RenderContext::RenderContext() : impl_(std::make_unique<Impl>()) {}
+RenderContext::RenderContext() = default;
 
 RenderContext::~RenderContext() {
     cleanup();
 }
 
 bool RenderContext::init(EGLDisplay display, EGLSurface surface) {
-    impl_->display = display;
-    impl_->surface = surface;
+    display_ = display;
+    surface_ = surface;
     
     // 获取 EGL 表面大小
     int width = 0, height = 0;
-    eglQuerySurface(display, surface, EGL_WIDTH, &width);
-    eglQuerySurface(display, surface, EGL_HEIGHT, &height);
+    eglQuerySurface(display_, surface_, EGL_WIDTH, &width);
+    eglQuerySurface(display_, surface_, EGL_HEIGHT, &height);
     
     // 创建 Cairo 表面 (使用 OpenGL 纹理作为目标)
     // 注意：这里简化处理，实际需要使用 cairo_gl_surface_create
-    impl_->cairoSurface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
-    if (!impl_->cairoSurface) {
-        LOG_ERROR << "Failed to create Cairo surface";
+    cairoSurface_ = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+    if (!cairoSurface_) {
+        LOG_E << "Failed to create Cairo surface";
         return false;
     }
     
-    impl_->cairo = cairo_create(impl_->cairoSurface);
-    if (!impl_->cairo) {
-        LOG_ERROR << "Failed to create Cairo context";
-        cairo_surface_destroy(impl_->cairoSurface);
-        impl_->cairoSurface = nullptr;
+    cairo_ = cairo_create(cairoSurface_);
+    if (!cairo_) {
+        LOG_E << "Failed to create Cairo context";
+        cairo_surface_destroy(cairoSurface_);
+        cairoSurface_ = nullptr;
         return false;
     }
     
-    impl_->initialized = true;
-    LOG_INFO << "RenderContext initialized: " << width << "x" << height;
+    initialized_ = true;
+    LOG_I << "RenderContext initialized: " << width << "x" << height;
     return true;
 }
 
 cairo_t* RenderContext::getCairoContext() const {
-    return impl_->cairo;
+    return cairo_;
 }
 
 EGLSurface RenderContext::getEglSurface() const {
-    return impl_->surface;
+    return surface_;
 }
 
 EGLDisplay RenderContext::getEglDisplay() const {
-    return impl_->display;
+    return display_;
 }
 
 void RenderContext::beginFrame() {
-    if (!impl_->initialized || !impl_->cairo) {
+    if (!initialized_ || !cairo_) {
         return;
     }
     
     // 清空画布
-    cairo_save(impl_->cairo);
-    cairo_set_source_rgba(impl_->cairo, 0, 0, 0, 0);
-    cairo_paint(impl_->cairo);
-    cairo_restore(impl_->cairo);
+    cairo_save(cairo_);
+    cairo_set_source_rgba(cairo_, 0, 0, 0, 0);
+    cairo_paint(cairo_);
+    cairo_restore(cairo_);
 }
 
 void RenderContext::endFrame() {
-    if (!impl_->initialized) {
+    if (!initialized_) {
         return;
     }
     
     // 交换 EGL 缓冲区
-    eglSwapBuffers(impl_->display, impl_->surface);
+    eglSwapBuffers(display_, surface_);
 }
 
 void RenderContext::cleanup() {
-    if (impl_->cairo) {
-        cairo_destroy(impl_->cairo);
-        impl_->cairo = nullptr;
+    if (cairo_) {
+        cairo_destroy(cairo_);
+        cairo_ = nullptr;
     }
     
-    if (impl_->cairoSurface) {
-        cairo_surface_destroy(impl_->cairoSurface);
-        impl_->cairoSurface = nullptr;
+    if (cairoSurface_) {
+        cairo_surface_destroy(cairoSurface_);
+        cairoSurface_ = nullptr;
     }
     
-    impl_->initialized = false;
+    initialized_ = false;
 }
 
 // ============================================================================

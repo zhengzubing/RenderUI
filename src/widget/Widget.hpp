@@ -1,16 +1,19 @@
 #pragma once
 
 #include "Types.hpp"
-#include "EventLoop.hpp"
+#include <nlohmann/json.hpp>
 #include <memory>
 #include <string>
 #include <vector>
+
+using json = nlohmann::json;
 
 namespace Component {
 
 // 前向声明
 class RenderContext;
 class Canvas;
+struct TouchEvent;
 
 /**
  * @brief 控件基类
@@ -108,9 +111,37 @@ public:
     virtual bool handleTouchEvent(const TouchEvent& event);
     
     /**
-     * @brief 处理键盘事件
+     * @brief 从 JSON 配置初始化控件
+     * @param config JSON 配置对象
      */
-    virtual bool handleKeyEvent(const KeyEvent& event);
+    virtual void fromJson(const json& config) {
+        // 默认实现：处理公共属性
+        if (config.contains("position")) {
+            const auto& pos = config["position"];
+            float x = pos.value("x", 0.0f);
+            float y = pos.value("y", 0.0f);
+            setPosition(x, y);
+        }
+        
+        if (config.contains("size")) {
+            const auto& size = config["size"];
+            float w = size.value("width", 0.0f);
+            float h = size.value("height", 0.0f);
+            setSize(w, h);
+        }
+        
+        if (config.contains("id")) {
+            setId(config["id"].get<std::string>());
+        }
+        
+        if (config.contains("zIndex")) {
+            setZIndex(config["zIndex"].get<int>());
+        }
+        
+        if (config.contains("visible")) {
+            setVisible(config["visible"].get<bool>());
+        }
+    }
     
 protected:
     /**
@@ -124,17 +155,16 @@ protected:
     void markDirty();
     
     std::string id_;
-    Vec2 position_;
-    Size size_;
+    float x_ = 0.0f;
+    float y_ = 0.0f;
+    float width_ = 0.0f;
+    float height_ = 0.0f;
     bool visible_ = true;
     bool dirty_ = false;
     int zIndex_ = 0;
     
     std::vector<std::shared_ptr<Widget>> children_;
     std::weak_ptr<Widget> parent_;
-    
-    struct Impl;
-    std::unique_ptr<Impl> impl_;
 };
 
 } // namespace Component

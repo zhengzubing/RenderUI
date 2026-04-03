@@ -8,7 +8,6 @@ using json = nlohmann::json;
 
 namespace Component {
 
-class Widget;
 class WidgetTree;
 
 /**
@@ -43,30 +42,12 @@ public:
                                    int& height);
     
     /**
-     * @brief 解析控件配置
+     * @brief 解析控件配置到控件树
      * @param config JSON 配置
      * @param tree 控件树
      * @return 是否成功
      */
     static bool parseWidgets(const json& config, WidgetTree& tree);
-    
-    /**
-     * @brief 解析单个控件
-     * @param config JSON 配置
-     * @return 控件实例
-     */
-    static std::shared_ptr<Widget> parseWidget(const json& config);
-    
-private:
-    /**
-     * @brief 应用样式属性
-     */
-    static void applyStyles(Widget* widget, const json& styles);
-    
-    /**
-     * @brief 应用布局属性
-     */
-    static void applyLayout(Widget* widget, const json& layout);
 };
 
 } // namespace Component

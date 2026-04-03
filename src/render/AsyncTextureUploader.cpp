@@ -27,7 +27,7 @@ bool AsyncTextureUploader::init(size_t pboBufferSize, int pboBufferCount) {
     pboPool_ = std::make_unique<PboPool>(config);
     
     if (!pboPool_->init()) {
-        LOG_ERROR << "Failed to initialize PboPool";
+        LOG_E << "Failed to initialize PboPool";
         return false;
     }
     
@@ -35,7 +35,7 @@ bool AsyncTextureUploader::init(size_t pboBufferSize, int pboBufferCount) {
     running_ = true;
     workerThread_ = std::make_unique<std::thread>(&AsyncTextureUploader::workerThread, this);
     
-    LOG_INFO << "AsyncTextureUploader initialized: " << pboBufferSize << " bytes x " << pboBufferCount << " buffers";
+    LOG_I << "AsyncTextureUploader initialized: " << pboBufferSize << " bytes x " << pboBufferCount << " buffers";
     
     return true;
 }
@@ -64,7 +64,7 @@ void AsyncTextureUploader::stop() {
     
     cleanup();
     
-    LOG_INFO << "AsyncTextureUploader stopped";
+    LOG_I << "AsyncTextureUploader stopped";
 }
 
 size_t AsyncTextureUploader::getQueueSize() const {
@@ -73,7 +73,7 @@ size_t AsyncTextureUploader::getQueueSize() const {
 }
 
 void AsyncTextureUploader::workerThread() {
-    LOG_INFO << "AsyncTextureUploader worker thread started";
+    LOG_I << "AsyncTextureUploader worker thread started";
     
     while (running_) {
         UploadTask task;
@@ -101,14 +101,14 @@ void AsyncTextureUploader::workerThread() {
         }
     }
     
-    LOG_INFO << "AsyncTextureUploader worker thread exiting";
+    LOG_I << "AsyncTextureUploader worker thread exiting";
 }
 
 void AsyncTextureUploader::executeTask(UploadTask& task) {
     // 获取 PBO
     int pboIndex = pboPool_->acquireBuffer();
     if (pboIndex < 0) {
-        LOG_ERROR << "Failed to acquire PBO buffer";
+        LOG_E << "Failed to acquire PBO buffer";
         if (task.onComplete) {
             task.onComplete(false);
         }
@@ -118,7 +118,7 @@ void AsyncTextureUploader::executeTask(UploadTask& task) {
     // 映射 PBO 并复制数据
     void* mappedPtr = pboPool_->mapBuffer(pboIndex);
     if (!mappedPtr) {
-        LOG_ERROR << "Failed to map PBO";
+        LOG_E << "Failed to map PBO";
         pboPool_->releaseBuffer(pboIndex);
         if (task.onComplete) {
             task.onComplete(false);
@@ -138,7 +138,7 @@ void AsyncTextureUploader::executeTask(UploadTask& task) {
     // 释放 PBO
     pboPool_->releaseBuffer(pboIndex);
     
-    LOG_DEBUG << "Texture uploaded: " << task.width << "x" << task.height << " to GL texture " << task.textureId;
+    LOG_D << "Texture uploaded: " << task.width << "x" << task.height << " to GL texture " << task.textureId;
     
     // 通知完成
     if (task.onComplete) {

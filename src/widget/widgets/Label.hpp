@@ -60,6 +60,29 @@ public:
      */
     void adjustSize();
     
+    /**
+     * @brief 从 JSON 配置初始化
+     */
+    void fromJson(const json& config) override {
+        // 先调用基类处理公共属性
+        Widget::fromJson(config);
+        
+        // 处理 Label 特有属性
+        if (config.contains("text")) {
+            setText(config["text"].get<std::string>());
+        }
+        if (config.contains("fontSize")) {
+            setFontSize(config["fontSize"].get<float>());
+        }
+        if (config.contains("fontFamily")) {
+            setFontFamily(config["fontFamily"].get<std::string>());
+        }
+        if (config.contains("color")) {
+            std::string colorStr = config["color"].get<std::string>();
+            setTextColor(Color::fromHex(colorStr.c_str()));
+        }
+    }
+    
 protected:
     void onDraw(Canvas& canvas) override;
     

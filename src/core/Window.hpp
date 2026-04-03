@@ -78,12 +78,13 @@ public:
     void cleanup();
     
 private:
-    struct Impl;
-    std::unique_ptr<Impl> impl_;
-    
     wl_display* display_ = nullptr;
     wl_compositor* compositor_ = nullptr;
     xdg_wm_base* wmBase_ = nullptr;
+    
+    // 友元函数，用于 Wayland 回调
+    friend void registryGlobal(void* data, wl_registry* registry,
+                               uint32_t name, const char* interface, uint32_t version);
     
     Surface surface_;
     EglContext eglContext_;

@@ -10,19 +10,10 @@
 
 namespace Component {
 
-struct CameraInput::Impl {
-    int fd = -1;  // V4L2 设备文件描述符
-    std::vector<void*> buffers;  // 内存映射缓冲区
-    size_t numBuffers = 4;
-};
-
-CameraInput::CameraInput(const Config& config) : config_(config) {
-    impl_ = std::make_unique<Impl>();
-}
+CameraInput::CameraInput(const Config& config) : config_(config) {}
 
 // 默认构造函数
-CameraInput::CameraInput() : CameraInput(Config()) {
-}
+CameraInput::CameraInput() : CameraInput(Config()) {}
 
 CameraInput::~CameraInput() {
     stop();
@@ -39,10 +30,10 @@ bool CameraInput::start() {
     
     // 打开 V4L2 设备
     std::string devicePath = "/dev/video" + std::to_string(config_.deviceId);
-    impl_->fd = open(devicePath.c_str(), O_RDWR | O_NONBLOCK, 0);
+    fd_ = open(devicePath.c_str(), O_RDWR | O_NONBLOCK, 0);
     
-    if (impl_->fd < 0) {
-        LOG_ERROR << "Failed to open camera device: " << devicePath;
+    if (fd_ < 0) {
+        LOG_E << "Failed to open camera device: " << devicePath;
         return false;
     }
     
@@ -54,46 +45,46 @@ bool CameraInput::start() {
     fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUV420;
     fmt.fmt.pix.field = V4L2_FIELD_NONE;
     
-    if (ioctl(impl_->fd, VIDIOC_S_FMT, &fmt) < 0) {
-        LOG_ERROR << "Failed to set video format";
-        close(impl_->fd);
-        impl_->fd = -1;
+    if (ioctl(fd_, VIDIOC_S_FMT, &fmt) < 0) {
+        LOG_E << "Failed to set video format";
+        close(fd_);
+        fd_ = -1;
         return false;
     }
     
     // 请求缓冲区
     struct v4l2_requestbuffers req = {};
-    req.count = impl_->numBuffers;
+    req.count = numBuffers_;
     req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     req.memory = V4L2_MEMORY_MMAP;
     
-    if (ioctl(impl_->fd, VIDIOC_REQBUFS, &req) < 0) {
-        LOG_ERROR << "Failed to request buffers";
-        close(impl_->fd);
-        impl_->fd = -1;
+    if (ioctl(fd_, VIDIOC_REQBUFS, &req) < 0) {
+        LOG_E << "Failed to request buffers";
+        close(fd_);
+        fd_ = -1;
         return false;
     }
     
     // 映射缓冲区
-    impl_->buffers.resize(req.count);
+    buffers_.resize(req.count);
     for (size_t i = 0; i < req.count; i++) {
         struct v4l2_buffer buf = {};
         buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         buf.memory = V4L2_MEMORY_MMAP;
         buf.index = i;
         
-        if (ioctl(impl_->fd, VIDIOC_QUERYBUF, &buf) < 0) {
-            LOG_ERROR << "Failed to query buffer";
-            close(impl_->fd);
+        if (ioctl(fd_, VIDIOC_QUERYBUF, &buf) < 0) {
+            LOG_E << "Failed to query buffer";
+            close(fd_);
             return false;
         }
         
-        impl_->buffers[i] = mmap(nullptr, buf.length, PROT_READ | PROT_WRITE, 
-                                  MAP_SHARED, impl_->fd, buf.m.offset);
+        buffers_[i] = mmap(nullptr, buf.length, PROT_READ | PROT_WRITE, 
+                              MAP_SHARED, fd_, buf.m.offset);
         
-        if (impl_->buffers[i] == MAP_FAILED) {
-            LOG_ERROR << "Failed to mmap buffer";
-            close(impl_->fd);
+        if (buffers_[i] == MAP_FAILED) {
+            LOG_E << "Failed to mmap buffer";
+            close(fd_);
             return false;
         }
     }
@@ -105,23 +96,23 @@ bool CameraInput::start() {
         buf.memory = V4L2_MEMORY_MMAP;
         buf.index = i;
         
-        if (ioctl(impl_->fd, VIDIOC_QBUF, &buf) < 0) {
-            LOG_ERROR << "Failed to queue buffer";
-            close(impl_->fd);
+        if (ioctl(fd_, VIDIOC_QBUF, &buf) < 0) {
+            LOG_E << "Failed to queue buffer";
+            close(fd_);
             return false;
         }
     }
     
     // 开始流
     enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    if (ioctl(impl_->fd, VIDIOC_STREAMON, &type) < 0) {
-        LOG_ERROR << "Failed to start streaming";
-        close(impl_->fd);
+    if (ioctl(fd_, VIDIOC_STREAMON, &type) < 0) {
+        LOG_E << "Failed to start streaming";
+        close(fd_);
         return false;
     }
     
     running_ = true;
-    LOG_INFO << "Camera started: /dev/video" << config_.deviceId << " " 
+    LOG_I << "Camera started: /dev/video" << config_.deviceId << " " 
              << config_.width << "x" << config_.height << "@" << config_.fps << "fps";
     
     return true;
@@ -134,49 +125,49 @@ void CameraInput::stop() {
     
     // 停止流
     enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    ioctl(impl_->fd, VIDIOC_STREAMOFF, &type);
+    ioctl(fd_, VIDIOC_STREAMOFF, &type);
     
     // 解除内存映射
-    for (auto* buffer : impl_->buffers) {
+    for (auto* buffer : buffers_) {
         if (buffer) {
             munmap(buffer, 1);  // 简化处理
         }
     }
     
     // 关闭设备
-    if (impl_->fd >= 0) {
-        close(impl_->fd);
-        impl_->fd = -1;
+    if (fd_ >= 0) {
+        close(fd_);
+        fd_ = -1;
     }
     
-    impl_->buffers.clear();
+    buffers_.clear();
     running_ = false;
     
-    LOG_INFO << "Camera stopped";
+    LOG_I << "Camera stopped";
 }
 
 void CameraInput::setConfig(const Config& config) {
     if (running_) {
-        LOG_WARNING << "Cannot change config while running";
+        LOG_W << "Cannot change config while running";
         return;
     }
     config_ = config;
 }
 
 bool CameraInput::readFrame() {
-    if (!running_ || impl_->fd < 0) {
+    if (!running_ || fd_ < 0) {
         return false;
     }
     
     fd_set fds;
     FD_ZERO(&fds);
-    FD_SET(impl_->fd, &fds);
+    FD_SET(fd_, &fds);
     
     struct timeval tv = {};
     tv.tv_sec = 1;
     
     // 等待帧就绪
-    int r = select(impl_->fd + 1, &fds, nullptr, nullptr, &tv);
+    int r = select(fd_ + 1, &fds, nullptr, nullptr, &tv);
     if (r <= 0) {
         return false;
     }
@@ -186,15 +177,15 @@ bool CameraInput::readFrame() {
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     buf.memory = V4L2_MEMORY_MMAP;
     
-    if (ioctl(impl_->fd, VIDIOC_DQBUF, &buf) < 0) {
+    if (ioctl(fd_, VIDIOC_DQBUF, &buf) < 0) {
         return false;
     }
     
     // 处理帧数据
-    processFrame(static_cast<uint8_t*>(impl_->buffers[buf.index]), buf.bytesused);
+    processFrame(static_cast<uint8_t*>(buffers_[buf.index]), buf.bytesused);
     
     // 重新入队
-    if (ioctl(impl_->fd, VIDIOC_QBUF, &buf) < 0) {
+    if (ioctl(fd_, VIDIOC_QBUF, &buf) < 0) {
         return false;
     }
     

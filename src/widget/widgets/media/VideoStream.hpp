@@ -5,6 +5,7 @@
 #include <mutex>
 #include <cstdint>
 #include <string>
+#include <GLES3/gl3.h>
 
 namespace Component {
 
@@ -91,15 +92,12 @@ protected:
     void onDraw(Canvas& canvas) override;
     
 private:
-    struct Impl;
-    std::unique_ptr<Impl> impl_;
-    
     std::string source_;
     bool playing_ = false;
     bool hasNewFrame_ = false;
     float fps_ = 0.0f;
     
-    uint64_t lastFrameTime_ = 0;
+    std::chrono::time_point<std::chrono::steady_clock> lastFrameTime_;
     int frameCount_ = 0;
     
     std::mutex frameMutex_;
@@ -108,6 +106,9 @@ private:
     // OpenGL 纹理 ID
     GLuint textures_[3] = {0};  // Y, U, V
     GLuint shaderProgram_ = 0;
+    
+    // 初始化状态
+    bool initialized_ = false;
     
     void initOpenGL();
     void updateTextures(const VideoFrame& frame);

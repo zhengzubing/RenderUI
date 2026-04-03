@@ -1,6 +1,5 @@
 #include "PboPool.hpp"
 #include "Logger.hpp"
-#include <GLES2/gl2ext.h>
 
 namespace Component {
 
@@ -32,7 +31,7 @@ bool PboPool::init() {
         
         // 检查是否成功
         if (glGetError() != GL_NO_ERROR) {
-            LOG_ERROR << "Failed to create PBO " << i;
+            LOG_E << "Failed to create PBO " << i;
             cleanup();
             return false;
         }
@@ -41,7 +40,7 @@ bool PboPool::init() {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     
     initialized_ = true;
-    LOG_INFO << "PboPool initialized: " << config_.bufferCount << " buffers x " << config_.bufferSize << " bytes";
+    LOG_I << "PboPool initialized: " << config_.bufferCount << " buffers x " << config_.bufferSize << " bytes";
     
     return true;
 }
@@ -64,7 +63,7 @@ int PboPool::acquireBuffer() {
     inUse_[index] = true;
     nextIndex_ = (index + 1) % config_.bufferCount;
     
-    LOG_WARNING << "PboPool exhausted, recycling buffer " << index;
+    LOG_W << "PboPool exhausted, recycling buffer " << index;
     return index;
 }
 
@@ -76,10 +75,10 @@ void* PboPool::mapBuffer(int index) {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboIds_[index]);
     
     // 映射缓冲区到 CPU 内存
-    void* ptr = glMapBufferOES(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY_OES);
+    void* ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, config_.bufferSize, GL_MAP_WRITE_BIT);
     
     if (!ptr) {
-        LOG_ERROR << "Failed to map PBO " << index;
+        LOG_E << "Failed to map PBO " << index;
         return nullptr;
     }
     
@@ -93,7 +92,7 @@ void PboPool::unmapBuffer(int index) {
     }
     
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboIds_[index]);
-    glUnmapBufferOES(GL_PIXEL_UNPACK_BUFFER);
+    glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
     
     mappedPointers_[index] = nullptr;
 }
@@ -142,7 +141,7 @@ void PboPool::cleanup() {
     for (int i = 0; i < config_.bufferCount; i++) {
         if (mappedPointers_[i]) {
             glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboIds_[i]);
-            glUnmapBufferOES(GL_PIXEL_UNPACK_BUFFER);
+            glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
             mappedPointers_[i] = nullptr;
         }
     }
@@ -156,7 +155,7 @@ void PboPool::cleanup() {
     inUse_.assign(config_.bufferCount, false);
     initialized_ = false;
     
-    LOG_DEBUG << "PboPool cleaned up";
+    LOG_D << "PboPool cleaned up";
 }
 
 } // namespace Component

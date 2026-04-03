@@ -2,77 +2,77 @@
 #include "RenderContext.hpp"
 #include "Logger.hpp"
 #include "ResourceManager.hpp"
-#include <GLES2/gl2.h>
+#include <GLES3/gl3.h>
 #include <tiny_obj_loader.h>
 #include <cstring>
+#include <fstream>
+#include <sstream>
 
 namespace Component {
 
-// 3D 模型渲染 Shader
-static const char* sVertexShaderSource = R"(
-    attribute vec3 aPosition;
-    attribute vec3 aNormal;
-    attribute vec2 aTexCoord;
-    
-    uniform mat4 uModelMatrix;
-    uniform mat4 uViewMatrix;
-    uniform mat4 uProjectionMatrix;
-    uniform mat4 uNormalMatrix;
-    
-    varying vec3 vNormal;
-    varying vec2 vTexCoord;
-    varying vec3 vFragPos;
-    
-    void main() {
-        vec4 worldPos = uModelMatrix * vec4(aPosition, 1.0);
-        vFragPos = vec3(worldPos);
-        vNormal = mat3(uNormalMatrix) * aNormal;
-        vTexCoord = aTexCoord;
-        
-        gl_Position = uProjectionMatrix * uViewMatrix * worldPos;
+// Shader 文件路径
+static const std::string sVertexShaderPath = "shaders/model3d_vertex.glsl";
+static const std::string sFragmentShaderPath = "shaders/model3d_fragment.glsl";
+
+// 从文件加载 Shader 源码
+static std::string loadShaderSource(const std::string& path) {
+    std::ifstream file(path);
+    if (!file.is_open()) {
+        LOG_E << "Failed to open shader file: " << path;
+        return "";
     }
-)";
-
-static const char* sFragmentShaderSource = R"(
-    precision mediump float;
     
-    varying vec3 vNormal;
-    varying vec2 vTexCoord;
-    varying vec3 vFragPos;
-    
-    uniform sampler2D uTexture;
-    uniform bool uHasTexture;
-    uniform vec3 uLightDir;
-    uniform vec3 uColor;
-    
-    void main() {
-        // 环境光
-        vec3 ambient = 0.2 * uColor;
-        
-        // 漫反射
-        vec3 norm = normalize(vNormal);
-        vec3 lightDir = normalize(uLightDir);
-        float diff = max(dot(norm, lightDir), 0.0);
-        vec3 diffuse = diff * uColor;
-        
-        vec3 result = ambient + diffuse;
-        
-        if (uHasTexture) {
-            vec3 texColor = texture2D(uTexture, vTexCoord).rgb;
-            result *= texColor;
-        }
-        
-        gl_FragColor = vec4(result, 1.0);
-    }
-)";
-
-struct Model3D::Impl {
-    bool loaded = false;
-};
-
-Model3D::Model3D() {
-    impl_ = std::make_unique<Impl>();
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
 }
+
+// 编译 Shader 并检查错误
+static GLuint compileShader(GLenum type, const std::string& source) {
+    GLuint shader = glCreateShader(type);
+    const char* src = source.c_str();
+    glShaderSource(shader, 1, &src, nullptr);
+    glCompileShader(shader);
+    
+    // 检查编译状态
+    GLint success;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        char log[512];
+        glGetShaderInfoLog(shader, sizeof(log), nullptr, log);
+        LOG_E << "Shader compilation failed: " << log;
+        glDeleteShader(shader);
+        return 0;
+    }
+    
+    return shader;
+}
+
+// 链接 Shader 程序并检查错误
+static GLuint linkShaderProgram(GLuint vertexShader, GLuint fragmentShader) {
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragmentShader);
+    glLinkProgram(program);
+    
+    // 检查链接状态
+    GLint success;
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    if (!success) {
+        char log[512];
+        glGetProgramInfoLog(program, sizeof(log), nullptr, log);
+        LOG_E << "Shader program linking failed: " << log;
+        glDeleteProgram(program);
+        return 0;
+    }
+    
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+    
+    return program;
+}
+
+Model3D::Model3D() = default;
 
 Model3D::~Model3D() {
     cleanupOpenGL();
@@ -85,12 +85,12 @@ bool Model3D::loadModel(const std::string& path) {
     std::string warn, err;
     
     if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path.c_str())) {
-        LOG_ERROR << "Failed to load OBJ model: " << path << " - " << err;
+        LOG_E << "Failed to load OBJ model: " << path << " - " << err;
         return false;
     }
     
     if (!warn.empty()) {
-        LOG_WARNING << "OBJ loader warning: " << warn;
+        LOG_W << "OBJ loader warning: " << warn;
     }
     
     // 转换顶点数据
@@ -125,10 +125,10 @@ bool Model3D::loadModel(const std::string& path) {
         }
     }
     
-    impl_->loaded = true;
+    loaded_ = true;
     initOpenGL();
     
-    LOG_INFO << "3D model loaded: " << path << " (" << modelData_.vertices.size() << " vertices, " << modelData_.indices.size() << " indices)";
+    LOG_I << "3D model loaded: " << path << " (" << modelData_.vertices.size() << " vertices, " << modelData_.indices.size() << " indices)";
     
     return true;
 }
@@ -148,7 +148,7 @@ bool Model3D::loadTexture(const std::string& path) {
     unsigned char* data = cairo_image_surface_get_data(surface);
     
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, 
-                 GL_BGRA, GL_UNSIGNED_BYTE, data);
+                 GL_RGBA, GL_UNSIGNED_BYTE, data);
     
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -156,7 +156,7 @@ bool Model3D::loadTexture(const std::string& path) {
     modelData_.hasTexture = true;
     modelData_.texturePath = path;
     
-    LOG_INFO << "3D model texture loaded: " << path;
+    LOG_I << "3D model texture loaded: " << path;
     return true;
 }
 
@@ -222,22 +222,31 @@ void Model3D::initOpenGL() {
     
     glBindVertexArray(0);
     
+    // 加载并编译 Shader
+    std::string vertexSource = loadShaderSource(sVertexShaderPath);
+    std::string fragmentSource = loadShaderSource(sFragmentShaderPath);
+    
+    if (vertexSource.empty() || fragmentSource.empty()) {
+        LOG_E << "Failed to load shader sources";
+        return;
+    }
+    
     // 编译 Shader
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &sVertexShaderSource, nullptr);
-    glCompileShader(vertexShader);
+    GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexSource);
+    GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentSource);
     
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &sFragmentShaderSource, nullptr);
-    glCompileShader(fragmentShader);
+    if (vertexShader == 0 || fragmentShader == 0) {
+        LOG_E << "Failed to compile shaders";
+        return;
+    }
     
-    shaderProgram_ = glCreateProgram();
-    glAttachShader(shaderProgram_, vertexShader);
-    glAttachShader(shaderProgram_, fragmentShader);
-    glLinkProgram(shaderProgram_);
+    // 链接 Shader 程序
+    shaderProgram_ = linkShaderProgram(vertexShader, fragmentShader);
     
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    if (shaderProgram_ == 0) {
+        LOG_E << "Failed to link shader program";
+        return;
+    }
     
     initialized_ = true;
     updateBuffers();
@@ -255,7 +264,7 @@ void Model3D::updateBuffers() {
 }
 
 void Model3D::renderOpenGL(Canvas& canvas) {
-    if (!initialized_ || !impl_->loaded) {
+    if (!initialized_ || !loaded_) {
         return;
     }
     

@@ -73,8 +73,11 @@ FetchContent_MakeAvailable(tinyobjloader)
 FetchContent_Declare(
     tinyply
     GIT_REPOSITORY https://github.com/ddiakopoulos/tinyply.git
-    GIT_TAG        2.3.4
+    GIT_TAG        3.0
 )
+set(BUILD_TINYPLOY_TESTS OFF CACHE BOOL "Build tinyply tests" FORCE)
+# 全局禁用 doctest 的 POSIX 信号处理（兼容新版 glibc）
+add_compile_definitions(DOCTEST_CONFIG_NO_POSIX_SIGNALS)
 FetchContent_MakeAvailable(tinyply)
 
 # 6. stb_image - 图像加载
@@ -197,6 +200,14 @@ file(GLOB_RECURSE CORE_SOURCES
 add_library(RenderUICore STATIC ${CORE_SOURCES} ${XDG_SHELL_CODE})
 add_dependencies(RenderUICore wayland_protocols)
 
+# 复制 Shader 文件到构建目录（在构建库之后）
+file(GLOB SHADER_FILES "${CMAKE_SOURCE_DIR}/shaders/*.glsl")
+foreach(SHADER_FILE ${SHADER_FILES})
+    get_filename_component(SHADER_NAME ${SHADER_FILE} NAME)
+    configure_file(${SHADER_FILE} ${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME} COPYONLY)
+endforeach()
+message(STATUS "Shader files will be copied to build directory: ${SHADER_FILES}")
+
 target_include_directories(RenderUICore
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
@@ -225,7 +236,6 @@ target_link_libraries(RenderUICore
         magic_enum::magic_enum
         tinyobjloader
         tinyply
-        cppsoft_signals
     PRIVATE
         ${CAIRO_LIBRARIES}
         ${WAYLAND_LIBRARIES}
@@ -268,18 +278,18 @@ target_link_libraries(renderui_demo PRIVATE RenderUICore)
 # ============================================================================
 
 # 阶段五：启用示例构建
-set(BUILD_EXAMPLES ON CACHE BOOL "Build examples" FORCE)
+# set(BUILD_EXAMPLES ON CACHE BOOL "Build examples" FORCE)
 
-if(BUILD_EXAMPLES)
-    add_subdirectory(examples)
-endif()
+# if(BUILD_EXAMPLES)
+#     add_subdirectory(examples)
+# endif()
 
 # ============================================================================
 # 测试
 # ============================================================================
 
 # 阶段五：启用测试构建
-set(BUILD_TESTS ON CACHE BOOL "Build tests" FORCE)
+# set(BUILD_TESTS ON CACHE BOOL "Build tests" FORCE)
 
 # if(BUILD_TESTS)
 #     # GoogleTest - 单元测试（阶段五）

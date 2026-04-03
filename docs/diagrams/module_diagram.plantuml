@@ -20,7 +20,6 @@ package "widget" {
   [Widget]
   [WidgetTree]
   [TouchEvent]
-  [KeyEvent]
   
   package "widgets" {
     [Button]
@@ -59,7 +58,6 @@ package "data" {
 
 package "ipc" {
   [DBusAdapter]
-  [CanSignal]
 }
 
 package "utils" {
@@ -111,7 +109,6 @@ Settings --> Storage
 
 WidgetTree --> JsonParser
 Application --> DBusAdapter
-DBusAdapter --> CanSignal
 
 EventLoop --> Timer
 EventLoop --> ThreadPool

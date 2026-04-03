@@ -68,6 +68,33 @@ public:
      */
     bool isPressed() const { return pressed_; }
     
+    /**
+     * @brief 从 JSON 配置初始化
+     */
+    void fromJson(const json& config) override {
+        // 先调用基类处理公共属性
+        Widget::fromJson(config);
+        
+        // 处理 Button 特有属性
+        if (config.contains("text")) {
+            setText(config["text"].get<std::string>());
+        }
+        if (config.contains("fontSize")) {
+            setFontSize(config["fontSize"].get<float>());
+        }
+        if (config.contains("backgroundColor")) {
+            std::string colorStr = config["backgroundColor"].get<std::string>();
+            setBackgroundColor(Color::fromHex(colorStr.c_str()));
+        }
+        if (config.contains("textColor")) {
+            std::string colorStr = config["textColor"].get<std::string>();
+            setTextColor(Color::fromHex(colorStr.c_str()));
+        }
+        if (config.contains("cornerRadius")) {
+            setCornerRadius(config["cornerRadius"].get<float>());
+        }
+    }
+    
 protected:
     void onDraw(Canvas& canvas) override;
     bool handleTouchEvent(const TouchEvent& event) override;

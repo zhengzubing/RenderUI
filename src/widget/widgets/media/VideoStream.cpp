@@ -1,54 +1,77 @@
 #include "VideoStream.hpp"
 #include "RenderContext.hpp"
 #include "Logger.hpp"
-#include <GLES2/gl2.h>
+#include <GLES3/gl3.h>
 #include <cstring>
 #include <chrono>
+#include <fstream>
+#include <sstream>
 
 namespace Component {
 
-// YUV 到 RGB 的 OpenGL ES Shader
-static const char* sVertexShaderSource = R"(
-    attribute vec4 aPosition;
-    attribute vec2 aTexCoord;
-    varying vec2 vTexCoord;
-    
-    void main() {
-        gl_Position = aPosition;
-        vTexCoord = aTexCoord;
+// Shader 文件路径
+static const std::string sVertexShaderPath = "shaders/videostream_vertex.glsl";
+static const std::string sFragmentShaderPath = "shaders/videostream_fragment.glsl";
+
+// 从文件加载 Shader 源码
+static std::string loadShaderSource(const std::string& path) {
+    std::ifstream file(path);
+    if (!file.is_open()) {
+        LOG_E << "Failed to open shader file: " << path;
+        return "";
     }
-)";
-
-static const char* sFragmentShaderSourceYUV420 = R"(
-    precision mediump float;
-    varying vec2 vTexCoord;
-    uniform sampler2D uTextureY;
-    uniform sampler2D uTextureU;
-    uniform sampler2D uTextureV;
     
-    void main() {
-        float y = texture2D(uTextureY, vTexCoord).r;
-        float u = texture2D(uTextureU, vTexCoord).r - 0.5;
-        float v = texture2D(uTextureV, vTexCoord).r - 0.5;
-        
-        // YUV420 到 RGB 转换矩阵
-        float r = y + 1.402 * v;
-        float g = y - 0.344 * u - 0.714 * v;
-        float b = y + 1.772 * u;
-        
-        gl_FragColor = vec4(r, g, b, 1.0);
-    }
-)";
-
-struct VideoStream::Impl {
-    int width = 0;
-    int height = 0;
-    bool initialized = false;
-};
-
-VideoStream::VideoStream(const std::string& source) : source_(source) {
-    impl_ = std::make_unique<Impl>();
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
 }
+
+// 编译 Shader 并检查错误
+static GLuint compileShader(GLenum type, const std::string& source) {
+    GLuint shader = glCreateShader(type);
+    const char* src = source.c_str();
+    glShaderSource(shader, 1, &src, nullptr);
+    glCompileShader(shader);
+    
+    // 检查编译状态
+    GLint success;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        char log[512];
+        glGetShaderInfoLog(shader, sizeof(log), nullptr, log);
+        LOG_E << "Shader compilation failed: " << log;
+        glDeleteShader(shader);
+        return 0;
+    }
+    
+    return shader;
+}
+
+// 链接 Shader 程序并检查错误
+static GLuint linkShaderProgram(GLuint vertexShader, GLuint fragmentShader) {
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragmentShader);
+    glLinkProgram(program);
+    
+    // 检查链接状态
+    GLint success;
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    if (!success) {
+        char log[512];
+        glGetProgramInfoLog(program, sizeof(log), nullptr, log);
+        LOG_E << "Shader program linking failed: " << log;
+        glDeleteProgram(program);
+        return 0;
+    }
+    
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+    
+    return program;
+}
+
+VideoStream::VideoStream(const std::string& source) : source_(source) {}
 
 VideoStream::~VideoStream() {
     stop();
@@ -64,7 +87,7 @@ void VideoStream::start() {
     if (!playing_) {
         playing_ = true;
         initOpenGL();
-        LOG_INFO << "VideoStream started: " << source_;
+        LOG_I << "VideoStream started: " << source_;
     }
 }
 
@@ -72,7 +95,7 @@ void VideoStream::stop() {
     if (playing_) {
         playing_ = false;
         hasNewFrame_ = false;
-        LOG_INFO << "VideoStream stopped";
+        LOG_I << "VideoStream stopped";
     }
 }
 
@@ -102,13 +125,12 @@ void VideoStream::pushFrame(const uint8_t* yData, const uint8_t* uData, const ui
     frameCount_++;
     
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-        now - std::chrono::milliseconds(lastFrameTime_)).count();
+        now - lastFrameTime_).count();
     
     if (elapsed >= 1000) {
         fps_ = static_cast<float>(frameCount_) * 1000.0f / static_cast<float>(elapsed);
         frameCount_ = 0;
-        lastFrameTime_ = std::chrono::duration_cast<std::chrono::milliseconds>(
-            now.time_since_epoch()).count();
+        lastFrameTime_ = now;
     }
     
     markDirty();
@@ -137,7 +159,7 @@ void VideoStream::pushFrameNV12(const uint8_t* yData, const uint8_t* uvData,
 }
 
 void VideoStream::initOpenGL() {
-    if (impl_->initialized) {
+    if (initialized_) {
         return;
     }
     
@@ -152,29 +174,38 @@ void VideoStream::initOpenGL() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
     
+    // 加载并编译 Shader
+    std::string vertexSource = loadShaderSource(sVertexShaderPath);
+    std::string fragmentSource = loadShaderSource(sFragmentShaderPath);
+    
+    if (vertexSource.empty() || fragmentSource.empty()) {
+        LOG_E << "Failed to load shader sources";
+        return;
+    }
+    
     // 编译 Shader
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &sVertexShaderSourceYUV420, nullptr);
-    glCompileShader(vertexShader);
+    GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexSource);
+    GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentSource);
     
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &sFragmentShaderSourceYUV420, nullptr);
-    glCompileShader(fragmentShader);
+    if (vertexShader == 0 || fragmentShader == 0) {
+        LOG_E << "Failed to compile shaders";
+        return;
+    }
     
-    shaderProgram_ = glCreateProgram();
-    glAttachShader(shaderProgram_, vertexShader);
-    glAttachShader(shaderProgram_, fragmentShader);
-    glLinkProgram(shaderProgram_);
+    // 链接 Shader 程序
+    shaderProgram_ = linkShaderProgram(vertexShader, fragmentShader);
     
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    if (shaderProgram_ == 0) {
+        LOG_E << "Failed to link shader program";
+        return;
+    }
     
-    impl_->initialized = true;
-    LOG_INFO << "VideoStream OpenGL initialized";
+    initialized_ = true;
+    LOG_I << "VideoStream OpenGL initialized";
 }
 
 void VideoStream::updateTextures(const VideoFrame& frame) {
-    if (!impl_->initialized || !frame.isValid()) {
+    if (!initialized_ || !frame.isValid()) {
         return;
     }
     
@@ -198,7 +229,7 @@ void VideoStream::updateTextures(const VideoFrame& frame) {
 }
 
 void VideoStream::renderWithOpenGL(Canvas& canvas) {
-    if (!impl_->initialized || !hasNewFrame_) {
+    if (!initialized_ || !hasNewFrame_) {
         return;
     }
     
@@ -253,7 +284,7 @@ void VideoStream::cleanupOpenGL() {
         shaderProgram_ = 0;
     }
     
-    impl_->initialized = false;
+    initialized_ = false;
 }
 
 } // namespace Component

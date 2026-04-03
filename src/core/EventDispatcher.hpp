@@ -33,13 +33,6 @@ public:
     bool dispatchTouchEvent(const TouchEvent& event);
     
     /**
-     * @brief 分发键盘事件
-     * @param event 键盘事件
-     * @return 是否已处理
-     */
-    bool dispatchKeyEvent(const KeyEvent& event);
-    
-    /**
      * @brief 注册事件监听器
      */
     using EventListener = std::function<bool(const Event&)>;

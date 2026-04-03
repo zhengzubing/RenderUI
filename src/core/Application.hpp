@@ -1,10 +1,13 @@
 #pragma once
 
+#include "RenderContext.hpp"
 #include <memory>
 #include <string>
 
+
 namespace Component {
 
+class Window;
 /**
  * @brief 应用入口与主循环管理
  * 
@@ -43,8 +46,13 @@ public:
     void shutdown();
     
 private:
-    struct Impl;
-    std::unique_ptr<Impl> impl_;
+    bool running_ = false;
+    std::string title_;
+    int width_ = 0;
+    int height_ = 0;
+    
+    Window* window_ = nullptr;
+    RenderContext renderContext_;
     
 public:
     // 允许 shared_ptr 正确销毁对象
