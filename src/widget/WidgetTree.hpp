@@ -80,7 +80,7 @@ public:
     /**
      * @brief 获取根节点
      */
-    const std::vector<std::shared_ptr<WidgetNode>>& getRoots() const { return roots_; }
+    const std::vector<std::shared_ptr<WidgetNode>>& getTopLevelWidgets() const { return roots_; }
     
 private:
     std::vector<std::shared_ptr<WidgetNode>> roots_;

@@ -1,0 +1,165 @@
+{
+  "window": {
+    "title": "RenderUI Complete Demo",
+    "width": 1024,
+    "height": 768
+  },
+  "widgets": [
+    {
+      "type": "container",
+      "id": "mainContainer",
+      "layout": "flex",
+      "direction": "vertical",
+      "padding": 20,
+      "spacing": 15,
+      "children": [
+        {
+          "type": "label",
+          "id": "titleLabel",
+          "text": "RenderUI 完整控件演示",
+          "fontSize": 24,
+          "color": "#333333",
+          "alignment": "center"
+        },
+        {
+          "type": "container",
+          "id": "buttonRow",
+          "layout": "flex",
+          "direction": "horizontal",
+          "spacing": 10,
+          "children": [
+            {
+              "type": "button",
+              "id": "btnPrimary",
+              "text": "主要按钮",
+              "width": 120,
+              "height": 40
+            },
+            {
+              "type": "button",
+              "id": "btnSecondary",
+              "text": "次要按钮",
+              "width": 120,
+              "height": 40
+            },
+            {
+              "type": "button",
+              "id": "btnDisabled",
+              "text": "禁用按钮",
+              "width": 120,
+              "height": 40,
+              "enabled": false
+            }
+          ]
+        },
+        {
+          "type": "container",
+          "id": "checkboxGroup",
+          "layout": "flex",
+          "direction": "horizontal",
+          "spacing": 20,
+          "children": [
+            {
+              "type": "checkbox",
+              "id": "chkOption1",
+              "text": "选项 1",
+              "checked": true
+            },
+            {
+              "type": "checkbox",
+              "id": "chkOption2",
+              "text": "选项 2",
+              "checked": false
+            },
+            {
+              "type": "checkbox",
+              "id": "chkOption3",
+              "text": "选项 3",
+              "checked": true
+            }
+          ]
+        },
+        {
+          "type": "container",
+          "id": "infoPanel",
+          "layout": "flex",
+          "direction": "horizontal",
+          "spacing": 15,
+          "children": [
+            {
+              "type": "container",
+              "id": "leftPanel",
+              "layout": "flex",
+              "direction": "vertical",
+              "spacing": 10,
+              "flexGrow": 1,
+              "children": [
+                {
+                  "type": "label",
+                  "id": "labelName",
+                  "text": "姓名：张三",
+                  "fontSize": 16
+                },
+                {
+                  "type": "label",
+                  "id": "labelAge",
+                  "text": "年龄：25",
+                  "fontSize": 16
+                },
+                {
+                  "type": "label",
+                  "id": "labelCity",
+                  "text": "城市：北京",
+                  "fontSize": 16
+                }
+              ]
+            },
+            {
+              "type": "imageview",
+              "id": "avatarImage",
+              "width": 100,
+              "height": 100,
+              "imagePath": "assets/avatar.png",
+              "scaleMode": "fit"
+            }
+          ]
+        },
+        {
+          "type": "container",
+          "id": "absolutePanel",
+          "layout": "absolute",
+          "width": 300,
+          "height": 200,
+          "backgroundColor": "#f0f0f0",
+          "children": [
+            {
+              "type": "label",
+              "id": "absLabel",
+              "text": "绝对定位",
+              "x": 10,
+              "y": 10,
+              "fontSize": 14
+            },
+            {
+              "type": "button",
+              "id": "absButton",
+              "text": "浮动按钮",
+              "x": 150,
+              "y": 80,
+              "width": 100,
+              "height": 35
+            },
+            {
+              "type": "checkbox",
+              "id": "absCheckbox",
+              "text": "独立选项",
+              "x": 20,
+              "y": 150,
+              "checked": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

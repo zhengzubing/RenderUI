@@ -2,13 +2,13 @@
 
 # 测试可执行文件
 add_executable(renderui_tests
+    test_main.cpp
     test_basic.cpp
 )
 
 target_link_libraries(renderui_tests
     RenderUICore
     GTest::gtest
-    GTest::gtest_main
 )
 
 # 包含头文件路径
@@ -30,5 +30,5 @@ gtest_discover_tests(renderui_tests)
 
 # 设置测试属性
 set_target_properties(renderui_tests PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/tests
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/assets
 )

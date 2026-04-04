@@ -4,10 +4,10 @@
 #include <memory>
 #include <string>
 
-
 namespace Component {
 
 class Window;
+class WidgetTree;
 /**
  * @brief 应用入口与主循环管理
  * 
@@ -45,6 +45,12 @@ public:
      */
     void shutdown();
     
+    /**
+     * @brief 获取控件树（用于添加/管理控件）
+     * @return WidgetTree 引用
+     */
+    WidgetTree& getWidgetTree();
+    
 private:
     bool running_ = false;
     std::string title_;
@@ -53,6 +59,7 @@ private:
     
     Window* window_ = nullptr;
     RenderContext renderContext_;
+    std::unique_ptr<WidgetTree> widgetTree_;
     
 public:
     // 允许 shared_ptr 正确销毁对象

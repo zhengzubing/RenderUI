@@ -1,4 +1,5 @@
 #include "Application.hpp"
+#include "WidgetTree.hpp"
 #include "Logger.hpp"
 #include "WindowManager.hpp"
 #include "EventLoop.hpp"
@@ -41,6 +42,9 @@ bool Application::init(const std::string& title, int width, int height) {
     // 初始化事件分发器
     EventDispatcher::instance().init();
     
+    // 创建控件树
+    widgetTree_ = std::make_unique<WidgetTree>();
+    
     // 创建主窗口
     window_ = WindowManager::instance().createMainWindow(title, width, height);
     if (!window_) {
@@ -71,7 +75,6 @@ int Application::run() {
     LOG_I << "Application main loop started";
     
     // 主循环
-    auto lastFrameTime = std::chrono::steady_clock::now();
     const auto frameDuration = std::chrono::milliseconds(16); // ~60 FPS
     
     while (running_) {
@@ -82,6 +85,11 @@ int Application::run() {
         
         // 开始渲染
         renderContext_.beginFrame();
+        
+        // 自动渲染控件树（类似 Qt 的自动渲染）
+        if (widgetTree_) {
+            widgetTree_->render(renderContext_);
+        }
         
         // 渲染调试信息（FPS 等）
         DebugMenu::instance().render();
@@ -113,12 +121,20 @@ void Application::quit() {
 void Application::shutdown() {
     LOG_I << "Application shutting down";
     
+    widgetTree_.reset();
     renderContext_.cleanup();
     WindowManager::instance().cleanup();
     EventLoop::instance().cleanup();
     ApplicationContext::instance().cleanup();
     
     LOG_I << "Application shutdown complete";
+}
+
+WidgetTree& Application::getWidgetTree() {
+    if (!widgetTree_) {
+        widgetTree_ = std::make_unique<WidgetTree>();
+    }
+    return *widgetTree_;
 }
 
 } // namespace Component
