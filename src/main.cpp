@@ -1,39 +1,31 @@
 /**
  * @file main.cpp
- * @brief 主程序入口点（测试代码已暂时禁用）
+ * @brief 主程序入口点
  */
 
-// #include <gtest/gtest.h>
+#include <gtest/gtest.h>
 #include <iostream>
 
-/**
- * @brief 测试前初始化
- */
-void SetUpTestSuite() {
-    std::cout << "=== RenderUI Test Suite Started ===" << std::endl;
-}
-
-/**
- * @brief 测试后清理
- */
-void TearDownTestSuite() {
-    std::cout << "=== RenderUI Test Suite Finished ===" << std::endl;
-}
-
 int main(int argc, char** argv) {
-    // 初始化 GoogleTest - 已注释
-    // ::testing::InitGoogleTest(&argc, argv);
+    // 初始化 GoogleTest
+    ::testing::InitGoogleTest(&argc, argv);
     
-    // 设置测试套件
-    SetUpTestSuite();
+    std::cout << "========================================" << std::endl;
+    std::cout << "RenderUI Test Suite" << std::endl;
+    std::cout << "========================================" << std::endl;
+    std::cout << std::endl;
     
-    // 运行所有测试 - 已注释
-    // int result = RUN_ALL_TESTS();
+    // 运行所有测试
+    int result = RUN_ALL_TESTS();
     
-    // 清理
-    TearDownTestSuite();
+    std::cout << std::endl;
+    std::cout << "========================================" << std::endl;
+    if (result == 0) {
+        std::cout << "✅ All tests passed!" << std::endl;
+    } else {
+        std::cout << "❌ Some tests failed!" << std::endl;
+    }
+    std::cout << "========================================" << std::endl;
     
-    return 0;
-    
-    // TODO: 恢复 gtest 时取消上面的注释
+    return result;
 }
