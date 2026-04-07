@@ -69,7 +69,8 @@ echo ""
 echo "步骤 6/6: 安装 DBus IPC 通信..."
 apt-get install -y \
     libdbus-1-dev \
-    dbus-x11
+    dbus-x11 \
+    libglib2.0-dev
 
 # 清理 apt 缓存
 apt-get clean

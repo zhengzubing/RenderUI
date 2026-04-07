@@ -131,7 +131,7 @@ build() {
     echo "Libraries location: ${BUILD_DIR}/lib/"
     echo ""
     echo "To run examples:"
-    echo "  cd ${BUILD_DIR}/bin && ./renderui_demo"
+    echo "  cd ${BUILD_DIR}/bin && ./ui_demo"
     echo ""
 }
 

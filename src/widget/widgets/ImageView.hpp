@@ -56,25 +56,7 @@ public:
     /**
      * @brief 从 JSON 配置初始化
      */
-    void fromJson(const json& config) override {
-        // 先调用基类处理公共属性
-        Widget::fromJson(config);
-        
-        // 处理 ImageView 特有属性
-        if (config.contains("image")) {
-            setImage(config["image"].get<std::string>());
-        }
-        if (config.contains("scaleMode")) {
-            std::string modeStr = config["scaleMode"].get<std::string>();
-            if (modeStr == "FitWidth") setScaleMode(ScaleMode::FitWidth);
-            else if (modeStr == "FitHeight") setScaleMode(ScaleMode::FitHeight);
-            else if (modeStr == "FitBoth") setScaleMode(ScaleMode::FitBoth);
-            else if (modeStr == "Fill") setScaleMode(ScaleMode::Fill);
-        }
-        if (config.contains("keepAspectRatio")) {
-            setKeepAspectRatio(config["keepAspectRatio"].get<bool>());
-        }
-    }
+    void fromJson(const json& config) override;
     
 protected:
     void onDraw(Canvas& canvas) override;

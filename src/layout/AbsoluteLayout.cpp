@@ -1,4 +1,5 @@
 #include "AbsoluteLayout.hpp"
+#include "Container.hpp"
 
 namespace Component {
 
@@ -41,10 +42,13 @@ void AbsoluteLayout::layout(Widget* root,
     }
     
     // 递归布局子控件
-    auto& children = root->getChildren();
-    for (auto& child : children) {
-        layout(child.get(), parentX, parentY, parentWidth, parentHeight);
+    if (auto container = dynamic_cast<Container*>(root)) {
+        auto& children = container->GetChildren();
+        for (auto& child : children) {
+            layout(child.get(), parentX, parentY, parentWidth, parentHeight);
+        }
     }
+
 }
 
 void AbsoluteLayout::setPosition(Widget* widget, float x, float y) {

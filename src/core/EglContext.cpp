@@ -1,5 +1,6 @@
 #include "EglContext.hpp"
 #include "Logger.hpp"
+#include <iomanip>
 
 namespace Component {
 
@@ -79,22 +80,54 @@ EGLSurface EglContext::createSurface(void* nativeWindow, int width, int height) 
         return EGL_NO_SURFACE;
     }
     
+    if (!nativeWindow) {
+        LOG_E << "Invalid native window pointer";
+        return EGL_NO_SURFACE;
+    }
+    
     // 创建 EGL 表面
+    // 注意：使用 wl_egl_window 时，不需要指定 EGL_WIDTH/EGL_HEIGHT
+    // 大小由 wl_egl_window 决定
     const EGLint surfaceAttribs[] = {
-        EGL_WIDTH, width,
-        EGL_HEIGHT, height,
         EGL_NONE
     };
+    
+    LOG_D << "Creating EGL surface with wl_egl_window: " << nativeWindow;
     
     EGLSurface surface = eglCreateWindowSurface(
         display_, config_, (EGLNativeWindowType)nativeWindow, surfaceAttribs);
     
     if (surface == EGL_NO_SURFACE) {
-        LOG_E << "Failed to create EGL surface";
+        EGLint error = eglGetError();
+        LOG_E << "Failed to create EGL surface, EGL error: 0x" << std::hex << error;
+        
+        // EGL 错误码说明
+        switch (error) {
+            case EGL_BAD_MATCH:
+                LOG_E << "  -> EGL_BAD_MATCH: Buffer type doesn't match config";
+                break;
+            case EGL_BAD_CONFIG:
+                LOG_E << "  -> EGL_BAD_CONFIG: Invalid EGLConfig";
+                break;
+            case EGL_BAD_NATIVE_WINDOW:
+                LOG_E << "  -> EGL_BAD_NATIVE_WINDOW: Invalid native window";
+                break;
+            case EGL_BAD_ALLOC:
+                LOG_E << "  -> EGL_BAD_ALLOC: Insufficient resources";
+                break;
+            case EGL_BAD_ATTRIBUTE:
+                LOG_E << "  -> EGL_BAD_ATTRIBUTE: Invalid surface attribute";
+                LOG_E << "     This usually means the native window type is incorrect";
+                break;
+            default:
+                LOG_E << "  -> Unknown EGL error code: 0x" << std::hex << error;
+                break;
+        }
+        
         return EGL_NO_SURFACE;
     }
     
-    LOG_I << "EGL surface created: " << width << "x" << height;
+    LOG_I << "EGL surface created successfully";
     return surface;
 }
 

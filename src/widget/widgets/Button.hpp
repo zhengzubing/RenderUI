@@ -71,29 +71,7 @@ public:
     /**
      * @brief 从 JSON 配置初始化
      */
-    void fromJson(const json& config) override {
-        // 先调用基类处理公共属性
-        Widget::fromJson(config);
-        
-        // 处理 Button 特有属性
-        if (config.contains("text")) {
-            setText(config["text"].get<std::string>());
-        }
-        if (config.contains("fontSize")) {
-            setFontSize(config["fontSize"].get<float>());
-        }
-        if (config.contains("backgroundColor")) {
-            std::string colorStr = config["backgroundColor"].get<std::string>();
-            setBackgroundColor(Color::fromHex(colorStr.c_str()));
-        }
-        if (config.contains("textColor")) {
-            std::string colorStr = config["textColor"].get<std::string>();
-            setTextColor(Color::fromHex(colorStr.c_str()));
-        }
-        if (config.contains("cornerRadius")) {
-            setCornerRadius(config["cornerRadius"].get<float>());
-        }
-    }
+    void fromJson(const json& config) override;
     
 protected:
     void onDraw(Canvas& canvas) override;
@@ -101,7 +79,7 @@ protected:
     
 private:
     std::string text_;
-    Color bgColor_{0.2f, 0.2f, 0.8f, 1.0f};  // 默认蓝色
+    Color bgColor_{0.8f, 0.3f, 0.8f, 1.0f};  // 默认
     Color textColor_{1.0f, 1.0f, 1.0f, 1.0f};  // 白色
     float fontSize_ = 16.0f;
     float cornerRadius_ = 4.0f;

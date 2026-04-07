@@ -1,6 +1,7 @@
 #include "widgets/ImageView.hpp"
 #include "RenderContext.hpp"
 #include "ResourceManager.hpp"
+#include "Logger.hpp"
 
 namespace Component {
 
@@ -9,6 +10,7 @@ ImageView::ImageView(const std::string& imagePath) : imagePath_(imagePath) {}
 ImageView::~ImageView() = default;
 
 void ImageView::setImage(const std::string& path) {
+    LOG_I << "ImageView setImage: " << path;
     if (imagePath_ != path) {
         imagePath_ = path;
         
@@ -48,6 +50,7 @@ void ImageView::adjustSize() {
 }
 
 void ImageView::onDraw(Canvas& canvas) {
+    LOG_I << "ImageView onDraw";
     if (imagePath_.empty()) {
         return;
     }
@@ -62,6 +65,27 @@ void ImageView::onDraw(Canvas& canvas) {
     
     // 绘制图片
     canvas.drawImage(pos.x, pos.y, size.width, size.height, surface);
+}
+
+void ImageView::fromJson(const json& config) {
+    LOG_I << "ImageView fromJson";
+    // 先调用基类处理公共属性
+    Widget::fromJson(config);
+    
+    // 处理 ImageView 特有属性
+    if (config.contains("imagePath")) {
+        setImage(config["imagePath"].get<std::string>());
+    }
+    if (config.contains("scaleMode")) {
+        std::string modeStr = config["scaleMode"].get<std::string>();
+        if (modeStr == "FitWidth") setScaleMode(ScaleMode::FitWidth);
+        else if (modeStr == "FitHeight") setScaleMode(ScaleMode::FitHeight);
+        else if (modeStr == "FitBoth") setScaleMode(ScaleMode::FitBoth);
+        else if (modeStr == "Fill") setScaleMode(ScaleMode::Fill);
+    }
+    if (config.contains("keepAspectRatio")) {
+        setKeepAspectRatio(config["keepAspectRatio"].get<bool>());
+    }
 }
 
 } // namespace Component

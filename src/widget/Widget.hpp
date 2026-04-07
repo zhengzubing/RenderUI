@@ -46,9 +46,49 @@ public:
     Vec2 getPosition() const;
     
     /**
+     * @brief 获取 X 坐标
+     */
+    float getX() const;
+    
+    /**
+     * @brief 设置 X 坐标
+     */
+    void setX(float x);
+    
+    /**
+     * @brief 获取 Y 坐标
+     */
+    float getY() const;
+    
+    /**
+     * @brief 设置 Y 坐标
+     */
+    void setY(float y);
+    
+    /**
      * @brief 获取大小
      */
     Size getSize() const;
+    
+    /**
+     * @brief 获取宽度
+     */
+    float getWidth() const;
+    
+    /**
+     * @brief 设置宽度
+     */
+    void setWidth(float width);
+    
+    /**
+     * @brief 获取高度
+     */
+    float getHeight() const;
+    
+    /**
+     * @brief 设置高度
+     */
+    void setHeight(float height);
     
     /**
      * @brief 是否可见
@@ -65,20 +105,15 @@ public:
      */
     virtual void render(RenderContext& ctx);
     
-    /**
-     * @brief 添加子控件
-     */
-    void addChild(std::shared_ptr<Widget> child);
+    // /**
+    //  * @brief 添加子控件
+    //  */
+    // void addChild(std::shared_ptr<Widget> child);
     
-    /**
-     * @brief 移除子控件
-     */
-    void removeChild(const std::string& id);
-    
-    /**
-     * @brief 获取子控件
-     */
-    const std::vector<std::shared_ptr<Widget>>& getChildren() const { return children_; }
+    // /**
+    //  * @brief 移除子控件
+    //  */
+    // void removeChild(const std::string& id);
     
     /**
      * @brief 获取父控件
@@ -88,22 +123,22 @@ public:
     /**
      * @brief 设置 ID
      */
-    void setId(const std::string& id) { id_ = id; }
+    void setId(const std::string& id);
     
     /**
      * @brief 获取 ID
      */
-    const std::string& getId() const { return id_; }
-    
-    /**
-     * @brief 设置 Z 序
-     */
-    void setZIndex(int zIndex) { zIndex_ = zIndex; }
+    const std::string& getId() const;
     
     /**
      * @brief 获取 Z 序
      */
-    int getZIndex() const { return zIndex_; }
+    int getZIndex() const;
+    
+    /**
+     * @brief 设置 Z 序
+     */
+    void setZIndex(int zIndex);
     
     /**
      * @brief 处理触摸事件
@@ -114,46 +149,19 @@ public:
      * @brief 从 JSON 配置初始化控件
      * @param config JSON 配置对象
      */
-    virtual void fromJson(const json& config) {
-        // 默认实现：处理公共属性
-        if (config.contains("position")) {
-            const auto& pos = config["position"];
-            float x = pos.value("x", 0.0f);
-            float y = pos.value("y", 0.0f);
-            setPosition(x, y);
-        }
-        
-        if (config.contains("size")) {
-            const auto& size = config["size"];
-            float w = size.value("width", 0.0f);
-            float h = size.value("height", 0.0f);
-            setSize(w, h);
-        }
-        
-        if (config.contains("id")) {
-            setId(config["id"].get<std::string>());
-        }
-        
-        if (config.contains("zIndex")) {
-            setZIndex(config["zIndex"].get<int>());
-        }
-        
-        if (config.contains("visible")) {
-            setVisible(config["visible"].get<bool>());
-        }
-    }
+    virtual void fromJson(const json& config);
+
+    /**
+     * @brief 标记为脏，需要重绘
+     */
+    void markDirty();
     
 protected:
     /**
      * @brief 子类实现绘制逻辑
      */
     virtual void onDraw(Canvas& canvas);
-    
-    /**
-     * @brief 标记为脏，需要重绘
-     */
-    void markDirty();
-    
+
     std::string id_;
     float x_ = 0.0f;
     float y_ = 0.0f;
@@ -163,7 +171,6 @@ protected:
     bool dirty_ = false;
     int zIndex_ = 0;
     
-    std::vector<std::shared_ptr<Widget>> children_;
     std::weak_ptr<Widget> parent_;
 };
 

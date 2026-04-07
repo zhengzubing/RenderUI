@@ -24,8 +24,7 @@ bool Application::init(const std::string& title, int width, int height) {
     height_ = height;
     
     // 初始化日志系统
-    Logger::instance().init(plog::info, "renderui.log");
-    LOG_I << "Application initializing: " << title << " " << width << "x" << height;
+    Logger::instance().init(plog::debug, "renderui.log");
     
     // 初始化应用上下文
     ApplicationContext::instance().init();
@@ -83,12 +82,19 @@ int Application::run() {
         // 处理 Wayland 事件
         window_->dispatchEvents();
         
+        // 更新布局（在渲染前）
+        if (widgetTree_) {
+            widgetTree_->updateLayout(width_, height_);
+        }
+        
         // 开始渲染
         renderContext_.beginFrame();
         
         // 自动渲染控件树（类似 Qt 的自动渲染）
         if (widgetTree_) {
             widgetTree_->render(renderContext_);
+        } else {
+            LOG_W << "Widget tree is null!";
         }
         
         // 渲染调试信息（FPS 等）

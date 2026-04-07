@@ -13,17 +13,24 @@ bool Logger::init(plog::Severity level, const std::string& logFile) {
     }
     
     level_ = level;
+
+    // 禁用标准输出缓冲，确保日志立即显示
+    setvbuf(stdout, nullptr, _IONBF, 0);
+    setvbuf(stderr, nullptr, _IONBF, 0);
     
-    // 初始化 plog
+    // 初始化 plog - 同时输出到文件和控制台
+    // TODO 输出到控制台未生效
     static plog::RollingFileAppender<plog::TxtFormatter> fileAppender(logFile.c_str());
-    static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
-    
+    static plog::ConsoleAppender<plog::TxtFormatter> consoleAppender(plog::streamStdOut);    
+    // 初始化日志系统，先添加文件 appender
     plog::init(level, &fileAppender);
-    // plog 不支持直接添加多个 appender，需要使用 ChainedFormatter
-    // 这里我们只用文件输出
+    
+    // 添加控制台 appender（链式添加）
+    plog::get()->addAppender(&consoleAppender);
     
     initialized_ = true;
     PLOG_INFO << "Logger initialized, level: " << plog::severityToString(level);
+    PLOG_INFO << "Logging to file: " << logFile << " and console";
     
     return true;
 }

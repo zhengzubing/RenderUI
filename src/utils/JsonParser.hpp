@@ -9,6 +9,7 @@ using json = nlohmann::json;
 namespace Component {
 
 class WidgetTree;
+class Container;
 
 /**
  * @brief JSON 配置解析器

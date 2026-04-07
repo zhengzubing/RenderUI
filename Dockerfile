@@ -43,6 +43,7 @@ RUN apt-get update && apt-get install -y \
 RUN apt-get update && apt-get install -y \
     libdbus-1-dev \
     dbus-x11 \
+    libglib2.0-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # 安装可选依赖（阶段四）

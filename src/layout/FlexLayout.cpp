@@ -1,4 +1,5 @@
 #include "FlexLayout.hpp"
+#include "Container.hpp"
 #include <algorithm>
 
 namespace Component {
@@ -10,20 +11,22 @@ std::vector<FlexLayout::FlexItem> FlexLayout::collectFlexItems(Widget* root) {
         return items;
     }
     
-    auto& children = root->getChildren();
-    for (auto& child : children) {
-        FlexItem item;
-        item.widget = child.get();
-        
-        auto size = child->getSize();
-        item.mainSize = size.width > 0 ? size.width : 0;
-        item.crossSize = size.height > 0 ? size.height : 0;
-        
-        // TODO: 从约束中获取 flex-grow/shrink
-        item.flexGrow = 0;
-        item.flexShrink = 1;
-        
-        items.push_back(item);
+    if (auto container = dynamic_cast<Container*>(root)) {
+        auto& children = container->GetChildren();
+        for (auto& child : children) {
+            FlexItem item;
+            item.widget = child.get();
+            
+            auto size = child->getSize();
+            item.mainSize = size.width > 0 ? size.width : 0;
+            item.crossSize = size.height > 0 ? size.height : 0;
+            
+            // TODO: 从约束中获取 flex-grow/shrink
+            item.flexGrow = 0;
+            item.flexShrink = 1;
+            
+            items.push_back(item);
+        }
     }
     
     return items;
@@ -70,22 +73,24 @@ void FlexLayout::measureChildren(Widget* root, float availableWidth, float avail
         return;
     }
     
-    auto& children = root->getChildren();
-    for (auto& child : children) {
-        auto size = child->getSize();
-        
-        // 如果宽度未设置且父容器有宽度，使用父容器宽度
-        if (size.width <= 0 && availableWidth > 0) {
-            child->setSize(availableWidth, size.height);
+    if (auto container = dynamic_cast<Container*>(root)) {
+        auto& children = container->GetChildren();
+        for (auto& child : children) {
+            auto size = child->getSize();
+            
+            // 如果宽度未设置且父容器有宽度，使用父容器宽度
+            if (size.width <= 0 && availableWidth > 0) {
+                child->setSize(availableWidth, size.height);
+            }
+            
+            // 如果高度未设置且父容器有高度，使用父容器高度
+            if (size.height <= 0 && availableHeight > 0) {
+                child->setSize(size.width, availableHeight);
+            }
+            
+            // 递归测量
+            measureChildren(child.get(), availableWidth, availableHeight);
         }
-        
-        // 如果高度未设置且父容器有高度，使用父容器高度
-        if (size.height <= 0 && availableHeight > 0) {
-            child->setSize(size.width, availableHeight);
-        }
-        
-        // 递归测量
-        measureChildren(child.get(), availableWidth, availableHeight);
     }
 }
 

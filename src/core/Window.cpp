@@ -1,6 +1,9 @@
 #include "Window.hpp"
 #include "Logger.hpp"
 #include <cstring>
+#include <cerrno>
+#include <thread>
+#include <chrono>
 
 namespace Component {
 
@@ -68,6 +71,38 @@ bool Window::create(const std::string& title, int width, int height) {
     // 设置窗口标题
     surface_.setTitle(title);
     
+    // ⚠️ 关键修复：等待 xdg_surface configure 事件
+    // Wayland 要求在创建 EGL surface 前必须收到 configure 事件
+    LOG_I << "Waiting for Wayland surface configuration...";
+    
+    // 先 commit 一次以触发 configure 事件
+    surface_.commit();
+    wl_display_flush(display_);
+    
+    // 等待 configure 事件（最多 2 秒）
+    int waitCount = 0;
+    const int maxWait = 200; // 200 * 10ms = 2秒
+    while (!surface_.isConfigured() && waitCount < maxWait) {
+        // 使用 dispatch 阻塞等待事件
+        int ret = wl_display_dispatch(display_);
+        if (ret < 0) {
+            LOG_E << "Wayland display dispatch error: " << strerror(errno);
+            break;
+        }
+        waitCount++;
+        
+        if (waitCount % 50 == 0) {
+            LOG_D << "Still waiting for configure... (" << waitCount << "/" << maxWait << ")";
+        }
+    }
+    
+    if (!surface_.isConfigured()) {
+        LOG_W << "Surface not configured after " << waitCount << " attempts (" << waitCount * 10 << "ms)";
+        LOG_W << "This may cause EGL surface creation to fail";
+    } else {
+        LOG_I << "Wayland surface configured after " << waitCount << " dispatches (" << waitCount * 10 << "ms)";
+    }
+    
     // 初始化 EGL
     if (!eglContext_.init(display_)) {
         LOG_E << "Failed to initialize EGL";
@@ -76,7 +111,8 @@ bool Window::create(const std::string& title, int width, int height) {
     }
     
     // 创建 EGL 表面
-    eglSurface_ = eglContext_.createSurface(surface_.getSurface(), width, height);
+    // ⚠️ 关键修复：使用 wl_egl_window 而不是 wl_surface
+    eglSurface_ = eglContext_.createSurface(surface_.getEglWindow(), width, height);
     if (eglSurface_ == EGL_NO_SURFACE) {
         LOG_E << "Failed to create EGL surface";
         cleanup();
@@ -96,9 +132,12 @@ bool Window::create(const std::string& title, int width, int height) {
 
 void Window::show() {
     if (!visible_) {
+        // 配置并显示窗口
         surface_.configure(width_, height_);
+        surface_.commit();
+        wl_display_flush(display_);
         visible_ = true;
-        LOG_I << "Window shown";
+        LOG_I << "Window shown: " << width_ << "x" << height_;
     }
 }
 

@@ -1,12 +1,12 @@
 {
   "window": {
     "title": "RenderUI Complete Demo",
-    "width": 1024,
-    "height": 768
+    "width": 1280,
+    "height": 960
   },
   "widgets": [
     {
-      "type": "container",
+      "type": "Container",
       "id": "mainContainer",
       "layout": "flex",
       "direction": "vertical",
@@ -14,7 +14,7 @@
       "spacing": 15,
       "children": [
         {
-          "type": "label",
+          "type": "Label",
           "id": "titleLabel",
           "text": "RenderUI 完整控件演示",
           "fontSize": 24,
@@ -22,57 +22,63 @@
           "alignment": "center"
         },
         {
-          "type": "container",
+          "type": "Container",
           "id": "buttonRow",
           "layout": "flex",
           "direction": "horizontal",
           "spacing": 10,
           "children": [
             {
-              "type": "button",
+              "type": "Button",
               "id": "btnPrimary",
               "text": "主要按钮",
+              "x": 200,
+              "y": 200,
               "width": 120,
-              "height": 40
+              "height": 200
             },
             {
-              "type": "button",
+              "type": "Button",
               "id": "btnSecondary",
               "text": "次要按钮",
+              "x": 200,
+              "y": 200,
               "width": 120,
-              "height": 40
+              "height": 200
             },
             {
-              "type": "button",
+              "type": "Button",
               "id": "btnDisabled",
               "text": "禁用按钮",
+              "x": 200,
+              "y": 200,
               "width": 120,
-              "height": 40,
+              "height": 200,
               "enabled": false
             }
           ]
         },
         {
-          "type": "container",
+          "type": "Container",
           "id": "checkboxGroup",
           "layout": "flex",
           "direction": "horizontal",
           "spacing": 20,
           "children": [
             {
-              "type": "checkbox",
+              "type": "Checkbox",
               "id": "chkOption1",
               "text": "选项 1",
               "checked": true
             },
             {
-              "type": "checkbox",
+              "type": "Checkbox",
               "id": "chkOption2",
               "text": "选项 2",
               "checked": false
             },
             {
-              "type": "checkbox",
+              "type": "Checkbox",
               "id": "chkOption3",
               "text": "选项 3",
               "checked": true
@@ -80,14 +86,14 @@
           ]
         },
         {
-          "type": "container",
+          "type": "Container",
           "id": "infoPanel",
           "layout": "flex",
           "direction": "horizontal",
           "spacing": 15,
           "children": [
             {
-              "type": "container",
+              "type": "Container",
               "id": "leftPanel",
               "layout": "flex",
               "direction": "vertical",
@@ -95,19 +101,19 @@
               "flexGrow": 1,
               "children": [
                 {
-                  "type": "label",
+                  "type": "Label",
                   "id": "labelName",
                   "text": "姓名：张三",
                   "fontSize": 16
                 },
                 {
-                  "type": "label",
+                  "type": "Label",
                   "id": "labelAge",
                   "text": "年龄：25",
                   "fontSize": 16
                 },
                 {
-                  "type": "label",
+                  "type": "Label",
                   "id": "labelCity",
                   "text": "城市：北京",
                   "fontSize": 16
@@ -115,7 +121,7 @@
               ]
             },
             {
-              "type": "imageview",
+              "type": "Imageview",
               "id": "avatarImage",
               "width": 100,
               "height": 100,
@@ -125,7 +131,7 @@
           ]
         },
         {
-          "type": "container",
+          "type": "Container",
           "id": "absolutePanel",
           "layout": "absolute",
           "width": 300,
@@ -133,7 +139,7 @@
           "backgroundColor": "#f0f0f0",
           "children": [
             {
-              "type": "label",
+              "type": "Label",
               "id": "absLabel",
               "text": "绝对定位",
               "x": 10,
@@ -141,7 +147,7 @@
               "fontSize": 14
             },
             {
-              "type": "button",
+              "type": "Button",
               "id": "absButton",
               "text": "浮动按钮",
               "x": 150,
@@ -150,7 +156,7 @@
               "height": 35
             },
             {
-              "type": "checkbox",
+              "type": "Checkbox",
               "id": "absCheckbox",
               "text": "独立选项",
               "x": 20,

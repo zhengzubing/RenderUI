@@ -1,6 +1,7 @@
 #include "widgets/Button.hpp"
 #include "RenderContext.hpp"
 #include "EventLoop.hpp"
+#include "Logger.hpp"
 
 namespace Component {
 
@@ -44,6 +45,9 @@ void Button::setCornerRadius(float radius) {
 void Button::onDraw(Canvas& canvas) {
     auto pos = getPosition();
     auto size = getSize();
+
+    LOG_I << "Button onDraw" << pos.x << "," << pos.y << " " << size.width << "," << size.height;
+
     
     // 绘制背景（圆角矩形）
     Color bgColor = pressed_ ? 
@@ -110,6 +114,30 @@ bool Button::handleTouchEvent(const TouchEvent& event) {
     }
     
     return false;
+}
+
+void Button::fromJson(const json& config) {
+    // 先调用基类处理公共属性
+    Widget::fromJson(config);
+    
+    // 处理 Button 特有属性
+    if (config.contains("text")) {
+        setText(config["text"].get<std::string>());
+    }
+    if (config.contains("fontSize")) {
+        setFontSize(config["fontSize"].get<float>());
+    }
+    if (config.contains("backgroundColor")) {
+        std::string colorStr = config["backgroundColor"].get<std::string>();
+        setBackgroundColor(Color::fromHex(colorStr.c_str()));
+    }
+    if (config.contains("textColor")) {
+        std::string colorStr = config["textColor"].get<std::string>();
+        setTextColor(Color::fromHex(colorStr.c_str()));
+    }
+    if (config.contains("cornerRadius")) {
+        setCornerRadius(config["cornerRadius"].get<float>());
+    }
 }
 
 } // namespace Component

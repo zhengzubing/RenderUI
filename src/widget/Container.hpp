@@ -66,10 +66,7 @@ public:
     /**
      * @brief 从 JSON 配置初始化
      */
-    void fromJson(const json& config) override {
-        // 先调用基类处理公共属性
-        Widget::fromJson(config);
-    }
+    void fromJson(const json& config) override;
     
 protected:
     std::vector<std::shared_ptr<Widget>> children_;

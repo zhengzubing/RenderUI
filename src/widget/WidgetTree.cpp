@@ -110,11 +110,7 @@ void WidgetTree::removeWidget(const std::string& id) {
         );
     } else {
         // 从根节点移除
-        roots_.erase(
-            std::remove_if(roots_.begin(), roots_.end(),
-                [&node](const std::shared_ptr<WidgetNode>& n) { return n == node; }),
-            roots_.end()
-        );
+        std::erase_if(roots_, [&node](const std::shared_ptr<WidgetNode>& n) { return n == node; });
     }
     
     // 递归删除子节点
@@ -147,7 +143,7 @@ std::shared_ptr<Widget> WidgetTree::findWidgetAt(float x, float y) {
 
 void WidgetTree::updateLayout(int screenWidth, int screenHeight) {
     // TODO: 实现布局计算
-    LOG_D << "Layout updated: " << screenWidth << "x" << screenHeight;
+    // LOG_D << "Layout updated: " << screenWidth << "x" << screenHeight;
 }
 
 void WidgetTree::render(RenderContext& ctx) {
@@ -186,6 +182,9 @@ bool WidgetTree::renderNode(RenderContext& ctx, const std::shared_ptr<WidgetNode
     
     // 渲染当前控件
     if (widget->isVisible() && widget->needsRender()) {
+        LOG_D << "Rendering widget: " 
+              << " at (" << widget->getX() << ", " << widget->getY() 
+              << ") size: " << widget->getWidth() << "x" << widget->getHeight();
         widget->render(ctx);
     }
     

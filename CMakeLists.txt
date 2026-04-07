@@ -112,6 +112,7 @@ pkg_check_modules(CAIRO REQUIRED cairo)
 pkg_check_modules(WAYLAND REQUIRED 
     wayland-client
     wayland-protocols
+    wayland-egl
 )
 
 # 生成 Wayland XDG Shell 协议头文件
@@ -158,6 +159,8 @@ pkg_check_modules(GLES REQUIRED glesv2)
 
 # 12. DBus - IPC 通信
 pkg_check_modules(DBUS REQUIRED dbus-1)
+# 13. GLib - DBus 依赖
+pkg_check_modules(GLIB REQUIRED glib-2.0)
 
 # ============================================================================
 # 扩展库（阶段四启用）
@@ -227,6 +230,7 @@ target_include_directories(RenderUICore
         ${EGL_INCLUDE_DIRS}
         ${GLES_INCLUDE_DIRS}
         ${DBUS_INCLUDE_DIRS}
+        ${GLIB_INCLUDE_DIRS}
 )
 
 target_link_libraries(RenderUICore
@@ -242,6 +246,7 @@ target_link_libraries(RenderUICore
         ${EGL_LIBRARIES}
         ${GLES_LIBRARIES}
         ${DBUS_LIBRARIES}
+        ${GLIB_LIBRARIES}
         dl
         pthread
 )

@@ -1,5 +1,6 @@
 #include "widgets/Label.hpp"
 #include "RenderContext.hpp"
+#include "Logger.hpp"
 
 namespace Component {
 
@@ -47,6 +48,7 @@ void Label::adjustSize() {
 }
 
 void Label::onDraw(Canvas& canvas) {
+    LOG_I << "Label onDraw";
     if (text_.empty()) {
         return;
     }
@@ -54,6 +56,26 @@ void Label::onDraw(Canvas& canvas) {
     auto pos = getPosition();
     canvas.drawText(pos.x, pos.y + fontSize_, text_.c_str(), 
                     fontFamily_.c_str(), fontSize_, textColor_);
+}
+
+void Label::fromJson(const json& config) {
+    // 先调用基类处理公共属性
+    Widget::fromJson(config);
+    
+    // 处理 Label 特有属性
+    if (config.contains("text")) {
+        setText(config["text"].get<std::string>());
+    }
+    if (config.contains("fontSize")) {
+        setFontSize(config["fontSize"].get<float>());
+    }
+    if (config.contains("fontFamily")) {
+        setFontFamily(config["fontFamily"].get<std::string>());
+    }
+    if (config.contains("color")) {
+        std::string colorStr = config["color"].get<std::string>();
+        setTextColor(Color::fromHex(colorStr.c_str()));
+    }
 }
 
 } // namespace Component

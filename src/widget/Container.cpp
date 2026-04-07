@@ -1,4 +1,5 @@
 #include "Container.hpp"
+#include "Logger.hpp"
 #include "RenderContext.hpp"
 
 namespace Component {
@@ -8,6 +9,8 @@ void Container::Add(std::shared_ptr<Widget> widget, const std::string& id) {
         return;
     }
     
+    LOG_I << "Adding widget to container: " << widget->getId();
+
     // 如果指定了 ID，使用指定的 ID
     if (!id.empty()) {
         widget->setId(id);
@@ -79,6 +82,11 @@ bool Container::handleTouchEvent(const TouchEvent& event) {
     
     // 子控件都不处理，则由容器自己处理
     return Widget::handleTouchEvent(event);
+}
+
+void Container::fromJson(const json& config) {
+    // 先调用基类处理公共属性
+    Widget::fromJson(config);
 }
 
 } // namespace Component

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wayland-client.h>
+#include <wayland-egl.h>
 #include <xdg-shell-client-protocol.h>
 #include <string>
 
@@ -50,6 +51,16 @@ public:
     xdg_toplevel* getToplevel() const { return toplevel_; }
     
     /**
+     * @brief 获取 Wayland EGL window（用于 EGL surface 创建）
+     */
+    wl_egl_window* getEglWindow() const { return eglWindow_; }
+    
+    /**
+     * @brief 检查是否已配置
+     */
+    bool isConfigured() const { return configured_; }
+    
+    /**
      * @brief 提交 surface 变更
      */
     void commit();
@@ -59,11 +70,49 @@ public:
      */
     void cleanup();
     
+    /**
+     * @brief 标记为已配置（内部使用）
+     */
+    void markAsConfigured();
+    
+    /**
+     * @brief 创建 EGL window（内部使用）
+     */
+    void createEglWindow(int width, int height);
+    
+    /**
+     * @brief 调整 EGL window 大小
+     */
+    void resizeEglWindow(int width, int height);
+    
+    /**
+     * @brief 设置窗口尺寸（内部使用）
+     */
+    void setWindowSize(int width, int height);
+    
+    /**
+     * @brief 获取窗口宽度
+     */
+    int getWidth() const { return width_; }
+    
+    /**
+     * @brief 获取窗口高度
+     */
+    int getHeight() const { return height_; }
+    
+    /**
+     * @brief 触发渲染
+     */
+    void render();
+    
 private:
     wl_surface* surface_ = nullptr;
+    wl_egl_window* eglWindow_ = nullptr;
     xdg_surface* xdgSurface_ = nullptr;
     xdg_toplevel* toplevel_ = nullptr;
     bool configured_ = false;
+    int width_ = 1280;   // 默认宽度
+    int height_ = 960;  // 默认高度
 };
 
 } // namespace Component

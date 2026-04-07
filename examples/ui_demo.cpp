@@ -35,25 +35,16 @@ using namespace Component;
  */
 void printWidgetTree(Widget* widget, int depth = 0) {
     if (!widget) return;
-    
-    std::string indent(depth * 2, ' ');    
-    if (auto label = dynamic_cast<Label*>(widget)) {
-        std::cout << " [\"" << label->getText() << "\"]";
-    } else if (auto button = dynamic_cast<Button*>(widget)) {
-        std::cout << " [\"" << button->getText() << "\"]";
-    } else if (auto checkbox = dynamic_cast<CheckBox*>(widget)) {
-        std::cout << " [\"" << checkbox->getText() << "\"]";
-    }
-    
+     
     if (!widget->getId().empty()) {
-        std::cout << " (id: " << widget->getId() << ")";
+        LOG_I << " (id: " << widget->getId() << ")";
     }
-    
-    std::cout << std::endl;
     
     // 递归打印子控件
     if (auto container = dynamic_cast<Container*>(widget)) {
-        for (const auto& child : container->getChildren()) {
+        LOG_I << container->getId() << " (Container)";
+        LOG_I <<  "Children (" << container->GetChildren().size() << "):";
+        for (const auto& child : container->GetChildren()) {
             printWidgetTree(child.get(), depth + 1);
         }
     }
@@ -89,8 +80,8 @@ int main(int argc, char** argv) {
         
         // 2. 解析窗口配置
         std::string title;
-        int width = 800;
-        int height = 600;
+        int width = 1280;
+        int height = 960;
         
         if (JsonParser::parseWindowConfig(config, title, width, height)) {
             LOG_I << "Window: " << title << " (" << width << "x" << height << ")";
@@ -110,12 +101,11 @@ int main(int argc, char** argv) {
             
             // 打印控件树结构（调试）
             LOG_I << "Widget Tree Structure:";
-            std::cout << std::endl;
             const auto& roots = tree.getTopLevelWidgets();
             for (const auto& root : roots) {
+                LOG_I << "Root Widget: " << root->widget->getId();
                 printWidgetTree(root->widget.get());
             }
-            std::cout << std::endl;
         } else {
             LOG_W << "Failed to parse widgets, using default layout";
         }
