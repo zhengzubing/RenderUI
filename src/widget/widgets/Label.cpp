@@ -1,5 +1,5 @@
 #include "widgets/Label.hpp"
-#include "RenderContext.hpp"
+#include "CairoGlRenderer.hpp"
 #include "Logger.hpp"
 
 namespace Component {

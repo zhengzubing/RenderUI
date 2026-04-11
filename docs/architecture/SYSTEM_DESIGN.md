@@ -62,7 +62,7 @@ renderui/
 ├── window/                  # 窗口管理
 │   ├── WindowManager.cpp    # 窗口创建与管理
 │   ├── Window.cpp           # 窗口对象
-│   ├── Surface.cpp          # Wayland Surface
+│   ├── WaylandSurface.cpp          # Wayland WaylandSurface
 │   └── EglContext.cpp       # OpenGL 上下文
 │
 ├── widget/                  # 控件系统
@@ -125,7 +125,7 @@ public:
     
     // 渲染接口
     virtual bool needsRender() const;  // 是否需要渲染
-    virtual void render(RenderContext& ctx);  // 渲染实现
+    virtual void render(CairoGlRenderer& ctx);  // 渲染实现
     
     // 事件处理
     virtual bool handleTouchEvent(const TouchEvent& event);
@@ -176,10 +176,10 @@ private:
 };
 ```
 
-#### 2.2.3 RenderContext 渲染上下文
+#### 2.2.3 CairoGlRenderer 渲染上下文
 
 ```cpp
-class RenderContext {
+class CairoGlRenderer {
 public:
     // 获取 Cairo 绘图表面（阶段一、二）
     cairo_t* getCairoContext();
@@ -530,7 +530,7 @@ private:
 ```cpp
 #define TRACE_EVENT(name) perfetto::TrackEvent::ScopedInstant(name)
 
-void Widget::render(RenderContext& ctx) {
+void Widget::render(CairoGlRenderer& ctx) {
     TRACE_EVENT("Widget::render");
     // ... 渲染代码
 }

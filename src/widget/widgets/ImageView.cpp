@@ -1,5 +1,5 @@
 #include "widgets/ImageView.hpp"
-#include "RenderContext.hpp"
+#include "CairoGlRenderer.hpp"
 #include "ResourceManager.hpp"
 #include "Logger.hpp"
 

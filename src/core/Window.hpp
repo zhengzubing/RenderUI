@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Types.hpp"
-#include "Surface.hpp"
+#include "WaylandSurface.hpp"
 #include "EglContext.hpp"
 #include <string>
 #include <memory>
@@ -86,7 +86,7 @@ private:
     friend void registryGlobal(void* data, wl_registry* registry,
                                uint32_t name, const char* interface, uint32_t version);
     
-    Surface surface_;
+    WaylandSurface surface_;
     EglContext eglContext_;
     
     EGLSurface eglSurface_ = EGL_NO_SURFACE;

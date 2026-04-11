@@ -1,5 +1,5 @@
 #include "Widget.hpp"
-#include "RenderContext.hpp"
+#include "CairoGlRenderer.hpp"
 #include "EventLoop.hpp"
 #include "Logger.hpp"
 #include <algorithm>
@@ -79,7 +79,7 @@ bool Widget::needsRender() const {
     return dirty_;
 }
 
-void Widget::render(RenderContext& ctx) {
+void Widget::render(CairoGlRenderer& ctx) {
     if (!visible_ || !dirty_) {
         return;
     }

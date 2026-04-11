@@ -146,7 +146,7 @@ void WidgetTree::updateLayout(int screenWidth, int screenHeight) {
     // LOG_D << "Layout updated: " << screenWidth << "x" << screenHeight;
 }
 
-void WidgetTree::render(RenderContext& ctx) {
+void WidgetTree::render(CairoGlRenderer& ctx) {
     // 按 Z 序排序
     std::vector<std::shared_ptr<WidgetNode>> sortedRoots = roots_;
     std::sort(sortedRoots.begin(), sortedRoots.end(),
@@ -173,7 +173,7 @@ std::shared_ptr<WidgetNode> WidgetTree::findNode(const std::string& id) {
     return nullptr;
 }
 
-bool WidgetTree::renderNode(RenderContext& ctx, const std::shared_ptr<WidgetNode>& node) {
+bool WidgetTree::renderNode(CairoGlRenderer& ctx, const std::shared_ptr<WidgetNode>& node) {
     if (!node || !node->widget) {
         return false;
     }

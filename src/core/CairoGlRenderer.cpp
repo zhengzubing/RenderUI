@@ -1,4 +1,4 @@
-#include "RenderContext.hpp"
+#include "CairoGlRenderer.hpp"
 #include "Logger.hpp"
 #include <GLES2/gl2.h>
 #include <cstring>
@@ -6,13 +6,13 @@
 
 namespace Component {
 
-RenderContext::RenderContext() = default;
+CairoGlRenderer::CairoGlRenderer() = default;
 
-RenderContext::~RenderContext() {
+CairoGlRenderer::~CairoGlRenderer() {
     cleanup();
 }
 
-bool RenderContext::init(EGLDisplay display, EGLSurface surface) {
+bool CairoGlRenderer::init(EGLDisplay display, EGLSurface surface) {
     display_ = display;
     surface_ = surface;
     
@@ -20,6 +20,7 @@ bool RenderContext::init(EGLDisplay display, EGLSurface surface) {
     int width = 0, height = 0;
     eglQuerySurface(display_, surface_, EGL_WIDTH, &width);
     eglQuerySurface(display_, surface_, EGL_HEIGHT, &height);
+    LOG_I << "EGL surface size: " << width << "x" << height;
     
     // 创建 Cairo 表面 (使用 OpenGL 纹理作为目标)
     // 注意：这里简化处理，实际需要使用 cairo_gl_surface_create
@@ -38,35 +39,31 @@ bool RenderContext::init(EGLDisplay display, EGLSurface surface) {
     }
     
     initialized_ = true;
-    LOG_I << "RenderContext initialized: " << width << "x" << height;
+    LOG_I << "CairoGlRenderer initialized: " << width << "x" << height;
     return true;
 }
 
-cairo_t* RenderContext::getCairoContext() const {
+cairo_t* CairoGlRenderer::getCairoContext() const {
     return cairo_;
 }
 
-EGLSurface RenderContext::getEglSurface() const {
+EGLSurface CairoGlRenderer::getEglSurface() const {
     return surface_;
 }
 
-EGLDisplay RenderContext::getEglDisplay() const {
+EGLDisplay CairoGlRenderer::getEglDisplay() const {
     return display_;
 }
 
-void RenderContext::beginFrame() {
+void CairoGlRenderer::beginFrame() {
     if (!initialized_ || !cairo_) {
         return;
     }
-    
-    // 清空画布
-    cairo_save(cairo_);
-    cairo_set_source_rgba(cairo_, 0.8, 0.2, 0.2, 0.0);
-    cairo_paint(cairo_);
-    cairo_restore(cairo_);
+
+    // TODO
 }
 
-void RenderContext::endFrame() {
+void CairoGlRenderer::endFrame() {
     if (!initialized_) {
         return;
     }
@@ -172,12 +169,12 @@ void RenderContext::endFrame() {
         glDeleteTextures(1, &texture);        
     }
     
-    LOG_I << "RenderContext endFrame: width" << width << " height" << height;
+    LOG_I << "CairoGlRenderer endFrame: width" << width << " height" << height;
     // 交换 EGL 缓冲区
     eglSwapBuffers(display_, surface_);
 }
 
-void RenderContext::cleanup() {
+void CairoGlRenderer::cleanup() {
     if (cairo_) {
         cairo_destroy(cairo_);
         cairo_ = nullptr;

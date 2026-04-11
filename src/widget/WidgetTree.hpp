@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Widget.hpp"
-#include "RenderContext.hpp"
+#include "CairoGlRenderer.hpp"
 #include <memory>
 #include <vector>
 #include <string>
@@ -70,7 +70,7 @@ public:
     /**
      * @brief 渲染所有需要渲染的控件
      */
-    void render(RenderContext& ctx);
+    void render(CairoGlRenderer& ctx);
     
     /**
      * @brief 标记所有控件为脏
@@ -87,7 +87,7 @@ private:
     std::map<std::string, std::shared_ptr<WidgetNode>> widgetMap_;
     
     std::shared_ptr<WidgetNode> findNode(const std::string& id);
-    bool renderNode(RenderContext& ctx, const std::shared_ptr<WidgetNode>& node);
+    bool renderNode(CairoGlRenderer& ctx, const std::shared_ptr<WidgetNode>& node);
     std::shared_ptr<Widget> findWidgetAtInNode(const std::shared_ptr<WidgetNode>& node, float x, float y);
     void markNodeDirty(const std::shared_ptr<WidgetNode>& node);
 };

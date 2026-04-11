@@ -16,7 +16,7 @@ rectangle "RenderUI 系统架构" {
   
   rectangle "<b>Render Backend</b>\n渲染后端\n=====\n• Cairo Renderer (阶段一)\n• Skia Renderer (阶段四)\n• OpenGL Renderer\n• 3D Model Renderer\n• 纹理缓存/PBO" as Render <<Layer>>
   
-  rectangle "<b>Window System</b>\n窗口系统\n=====\n• Wayland Client\n• EGL 上下文管理\n• Surface 管理\n• Input 事件采集" as Window <<Layer>>
+  rectangle "<b>Window System</b>\n窗口系统\n=====\n• Wayland Client\n• EGL 上下文管理\n• WaylandSurface 管理\n• Input 事件采集" as Window <<Layer>>
   
   rectangle "<b>Platform Layer</b>\n平台层\n=====\n• Linux Kernel\n• ARM64 架构\n• DRM/KMS 显示\n• Input 子系统\n• DBus IPC" as Platform <<Layer>>
 }

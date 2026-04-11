@@ -11,7 +11,7 @@ using json = nlohmann::json;
 namespace Component {
 
 // 前向声明
-class RenderContext;
+class CairoGlRenderer;
 class Canvas;
 struct TouchEvent;
 
@@ -103,7 +103,7 @@ public:
     /**
      * @brief 渲染控件
      */
-    virtual void render(RenderContext& ctx);
+    virtual void render(CairoGlRenderer& ctx);
     
     // /**
     //  * @brief 添加子控件

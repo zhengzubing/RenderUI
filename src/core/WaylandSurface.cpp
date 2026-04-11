@@ -1,11 +1,11 @@
-#include "Surface.hpp"
+#include "WaylandSurface.hpp"
 #include "Logger.hpp"
 
 namespace Component {
 
 // XDG surface 配置回调
 static void xdgSurfaceConfigure(void* data, xdg_surface* xdgSurface, uint32_t serial) {
-    Surface* surface = static_cast<Surface*>(data);
+    WaylandSurface* surface = static_cast<WaylandSurface*>(data);
 
     // 【第一步：必须 ack】
     xdg_surface_ack_configure(xdgSurface, serial);
@@ -41,7 +41,7 @@ static void xdgToplevelConfigure(
     int32_t height,
     wl_array* /*states*/
 ) {
-    Surface* surface = static_cast<Surface*>(data);
+    WaylandSurface* surface = static_cast<WaylandSurface*>(data);
     
     // 保存合成器要求的窗口大小
     if (width > 0 && height > 0) {
@@ -57,13 +57,13 @@ static const struct xdg_toplevel_listener xdgToplevelListener = {
     .close = xdgToplevelClose,
 };
 
-Surface::Surface() = default;
+WaylandSurface::WaylandSurface() = default;
 
-Surface::~Surface() {
+WaylandSurface::~WaylandSurface() {
     cleanup();
 }
 
-bool Surface::create(wl_compositor* compositor, xdg_wm_base* wmBase) {
+bool WaylandSurface::create(wl_compositor* compositor, xdg_wm_base* wmBase) {
     if (!compositor || !wmBase) {
         LOG_E << "Invalid compositor or wmBase";
         return false;
@@ -106,32 +106,32 @@ bool Surface::create(wl_compositor* compositor, xdg_wm_base* wmBase) {
     return true;
 }
 
-void Surface::setTitle(const std::string& title) {
+void WaylandSurface::setTitle(const std::string& title) {
     if (toplevel_) {
         xdg_toplevel_set_title(toplevel_, title.c_str());
         xdg_toplevel_set_app_id(toplevel_, "com.renderui.app");
     }
 }
 
-void Surface::configure(int width, int height) {
+void WaylandSurface::configure(int width, int height) {
     if (toplevel_) {
         // 请求窗口大小（实际大小由合成器决定）
         wl_surface_commit(surface_);
     }
 }
 
-void Surface::commit() {
+void WaylandSurface::commit() {
     if (surface_) {
         wl_surface_commit(surface_);
     }
 }
 
-void Surface::markAsConfigured() {
+void WaylandSurface::markAsConfigured() {
     configured_ = true;
-    LOG_D << "Surface marked as configured";
+    LOG_D << "WaylandSurface marked as configured";
 }
 
-void Surface::createEglWindow(int width, int height) {
+void WaylandSurface::createEglWindow(int width, int height) {
     if (eglWindow_) {
         LOG_W << "EGL window already exists";
         return;
@@ -151,7 +151,7 @@ void Surface::createEglWindow(int width, int height) {
     LOG_I << "wl_egl_window created: " << width << "x" << height;
 }
 
-void Surface::resizeEglWindow(int width, int height) {
+void WaylandSurface::resizeEglWindow(int width, int height) {
     if (eglWindow_) {
         wl_egl_window_resize(eglWindow_, width, height, 0, 0);
         LOG_D << "wl_egl_window resized to: " << width << "x" << height;
@@ -160,7 +160,7 @@ void Surface::resizeEglWindow(int width, int height) {
     }
 }
 
-void Surface::cleanup() {
+void WaylandSurface::cleanup() {
     if (eglWindow_) {
         wl_egl_window_destroy(eglWindow_);
         eglWindow_ = nullptr;
@@ -186,15 +186,15 @@ void Surface::cleanup() {
     LOG_D << "Wayland surface cleaned up";
 }
 
-void Surface::setWindowSize(int width, int height) {
+void WaylandSurface::setWindowSize(int width, int height) {
     width_ = width;
     height_ = height;
     LOG_D << "Window size set to: " << width << "x" << height;
 }
 
-void Surface::render() {
+void WaylandSurface::render() {
     // TODO: 触发渲染逻辑
-    // 这里需要通知 Application 或 RenderContext 进行重绘
+    // 这里需要通知 Application 或 CairoGlRenderer 进行重绘
     LOG_D << "Render triggered";
 }
 

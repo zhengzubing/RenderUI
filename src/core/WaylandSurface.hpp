@@ -12,10 +12,10 @@ namespace Component {
  * 
  * 管理 Wayland surface 和 xdg_toplevel
  */
-class Surface {
+class WaylandSurface {
 public:
-    Surface();
-    ~Surface();
+    WaylandSurface();
+    ~WaylandSurface();
     
     /**
      * @brief 创建 Wayland surface
@@ -111,8 +111,8 @@ private:
     xdg_surface* xdgSurface_ = nullptr;
     xdg_toplevel* toplevel_ = nullptr;
     bool configured_ = false;
-    int width_ = 1280;   // 默认宽度
-    int height_ = 960;  // 默认高度
+    int width_;   // 默认宽度
+    int height_;  // 默认高度
 };
 
 } // namespace Component

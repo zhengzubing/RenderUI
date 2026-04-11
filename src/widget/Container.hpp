@@ -56,7 +56,7 @@ public:
     /**
      * @brief 渲染容器及所有子控件
      */
-    void render(RenderContext& ctx) override;
+    void render(CairoGlRenderer& ctx) override;
     
     /**
      * @brief 处理触摸事件

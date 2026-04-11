@@ -13,10 +13,10 @@ namespace Component {
  * 
  * 提供统一的绘图接口，底层支持 Cairo 2D 绘制和 OpenGL 纹理上传
  */
-class RenderContext {
+class CairoGlRenderer {
 public:
-    RenderContext();
-    ~RenderContext();
+    CairoGlRenderer();
+    ~CairoGlRenderer();
     
     /**
      * @brief 初始化 EGL 和 Cairo

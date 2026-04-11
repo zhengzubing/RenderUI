@@ -1,6 +1,6 @@
 #include "Container.hpp"
 #include "Logger.hpp"
-#include "RenderContext.hpp"
+#include "CairoGlRenderer.hpp"
 
 namespace Component {
 
@@ -53,7 +53,7 @@ std::shared_ptr<Widget> Container::Get(const std::string& id) const {
     return (it != childMap_.end()) ? it->second : nullptr;
 }
 
-void Container::render(RenderContext& ctx) {
+void Container::render(CairoGlRenderer& ctx) {
     if (!isVisible()) {
         return;
     }

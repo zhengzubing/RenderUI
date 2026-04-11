@@ -4,7 +4,7 @@
 #include "WindowManager.hpp"
 #include "EventLoop.hpp"
 #include "ApplicationContext.hpp"
-#include "RenderContext.hpp"
+#include "CairoGlRenderer.hpp"
 #include "ResourceManager.hpp"
 #include "DebugMenu.hpp"
 #include "EventDispatcher.hpp"
@@ -45,6 +45,7 @@ bool Application::init(const std::string& title, int width, int height) {
     widgetTree_ = std::make_unique<WidgetTree>();
     
     // 创建主窗口
+    LOG_I << "Creating main window: " << title << " " << width << "x" << height;
     window_ = WindowManager::instance().createMainWindow(title, width, height);
     if (!window_) {
         LOG_E << "Failed to create main window";

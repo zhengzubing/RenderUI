@@ -61,13 +61,16 @@ bool Window::create(const std::string& title, int width, int height) {
         return false;
     }
     
-    // 创建 Surface
+    // 创建 WaylandSurface
     if (!surface_.create(compositor_, wmBase_)) {
         LOG_E << "Failed to create Wayland surface";
         cleanup();
         return false;
     }
-    
+
+    surface_.setWindowSize(width, height);
+    LOG_I << "WaylandSurface initial size set to: " << width << "x" << height;
+
     // 设置窗口标题
     surface_.setTitle(title);
     
@@ -97,7 +100,7 @@ bool Window::create(const std::string& title, int width, int height) {
     }
     
     if (!surface_.isConfigured()) {
-        LOG_W << "Surface not configured after " << waitCount << " attempts (" << waitCount * 10 << "ms)";
+        LOG_W << "WaylandSurface not configured after " << waitCount << " attempts (" << waitCount * 10 << "ms)";
         LOG_W << "This may cause EGL surface creation to fail";
     } else {
         LOG_I << "Wayland surface configured after " << waitCount << " dispatches (" << waitCount * 10 << "ms)";

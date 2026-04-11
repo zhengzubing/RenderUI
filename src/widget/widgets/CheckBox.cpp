@@ -1,5 +1,5 @@
 #include "widgets/CheckBox.hpp"
-#include "RenderContext.hpp"
+#include "CairoGlRenderer.hpp"
 #include "EventLoop.hpp"
 
 namespace Component {

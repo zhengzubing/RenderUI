@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RenderContext.hpp"
+#include "CairoGlRenderer.hpp"
 #include <memory>
 #include <string>
 
@@ -58,7 +58,7 @@ private:
     int height_ = 0;
     
     Window* window_ = nullptr;
-    RenderContext renderContext_;
+    CairoGlRenderer renderContext_;
     std::unique_ptr<WidgetTree> widgetTree_;
     
 public:

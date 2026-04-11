@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Surface.hpp"
+#include "WaylandSurface.hpp"
 #include "Window.hpp"
 #include <memory>
 #include <vector>

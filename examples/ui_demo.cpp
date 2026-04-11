@@ -8,8 +8,6 @@
  * - CheckBox（复选框）
  * - ImageView（图片视图）
  * - Container（容器）
- * - FlexLayout（弹性布局）
- * - AbsoluteLayout（绝对布局）
  */
 
 #include "Application.hpp"
@@ -22,8 +20,6 @@
 #include "CheckBox.hpp"
 #include "ImageView.hpp"
 #include "Container.hpp"
-#include "FlexLayout.hpp"
-#include "AbsoluteLayout.hpp"
 
 #include <iostream>
 #include <filesystem>
@@ -80,8 +76,8 @@ int main(int argc, char** argv) {
         
         // 2. 解析窗口配置
         std::string title;
-        int width = 1280;
-        int height = 960;
+        int width;
+        int height;
         
         if (JsonParser::parseWindowConfig(config, title, width, height)) {
             LOG_I << "Window: " << title << " (" << width << "x" << height << ")";
