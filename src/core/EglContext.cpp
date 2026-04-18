@@ -1,7 +1,168 @@
-#include "Component/EglContext.hpp"
+#include "EglContext.hpp"
+#include "Logger.hpp"
+#include <iomanip>
 
 namespace Component {
 
-// TODO: 实现 EglContext 类
+EglContext::EglContext() = default;
+
+EglContext::~EglContext() {
+    cleanup();
+}
+
+bool EglContext::init(void* display) {
+    if (initialized_) {
+        LOG_W << "EGL already initialized";
+        return true;
+    }
+    
+    // 获取 EGL 显示连接
+    display_ = eglGetDisplay((EGLNativeDisplayType)display);
+    if (display_ == EGL_NO_DISPLAY) {
+        LOG_E << "Failed to get EGL display";
+        return false;
+    }
+    
+    // 初始化 EGL
+    if (!eglInitialize(display_, nullptr, nullptr)) {
+        LOG_E << "Failed to initialize EGL";
+        display_ = EGL_NO_DISPLAY;
+        return false;
+    }
+    
+    // 配置 EGL
+    const EGLint configAttribs[] = {
+        EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+        EGL_RED_SIZE, 8,
+        EGL_GREEN_SIZE, 8,
+        EGL_BLUE_SIZE, 8,
+        EGL_ALPHA_SIZE, 8,
+        EGL_DEPTH_SIZE, 0,
+        EGL_STENCIL_SIZE, 0,
+        EGL_NONE
+    };
+    
+    EGLint numConfigs = 0;
+    if (!eglChooseConfig(display_, configAttribs, &config_, 1, &numConfigs)) {
+        LOG_E << "Failed to choose EGL config";
+        cleanup();
+        return false;
+    }
+    
+    if (numConfigs == 0) {
+        LOG_E << "No suitable EGL config found";
+        cleanup();
+        return false;
+    }
+    
+    // 创建 EGL 上下文
+    const EGLint contextAttribs[] = {
+        EGL_CONTEXT_CLIENT_VERSION, 2,
+        EGL_NONE
+    };
+    
+    context_ = eglCreateContext(display_, config_, EGL_NO_CONTEXT, contextAttribs);
+    if (context_ == EGL_NO_CONTEXT) {
+        LOG_E << "Failed to create EGL context";
+        cleanup();
+        return false;
+    }
+    
+    initialized_ = true;
+    LOG_I << "EGL initialized successfully";
+    return true;
+}
+
+EGLSurface EglContext::createSurface(void* nativeWindow, int width, int height) {
+    if (!initialized_) {
+        LOG_E << "EGL not initialized";
+        return EGL_NO_SURFACE;
+    }
+    
+    if (!nativeWindow) {
+        LOG_E << "Invalid native window pointer";
+        return EGL_NO_SURFACE;
+    }
+    
+    // 创建 EGL 表面
+    // 注意：使用 wl_egl_window 时，不需要指定 EGL_WIDTH/EGL_HEIGHT
+    // 大小由 wl_egl_window 决定
+    const EGLint surfaceAttribs[] = {
+        EGL_NONE
+    };
+    
+    LOG_D << "Creating EGL surface with wl_egl_window: " << nativeWindow;
+    
+    EGLSurface surface = eglCreateWindowSurface(
+        display_, config_, (EGLNativeWindowType)nativeWindow, surfaceAttribs);
+    
+    if (surface == EGL_NO_SURFACE) {
+        EGLint error = eglGetError();
+        LOG_E << "Failed to create EGL surface, EGL error: 0x" << std::hex << error;
+        
+        // EGL 错误码说明
+        switch (error) {
+            case EGL_BAD_MATCH:
+                LOG_E << "  -> EGL_BAD_MATCH: Buffer type doesn't match config";
+                break;
+            case EGL_BAD_CONFIG:
+                LOG_E << "  -> EGL_BAD_CONFIG: Invalid EGLConfig";
+                break;
+            case EGL_BAD_NATIVE_WINDOW:
+                LOG_E << "  -> EGL_BAD_NATIVE_WINDOW: Invalid native window";
+                break;
+            case EGL_BAD_ALLOC:
+                LOG_E << "  -> EGL_BAD_ALLOC: Insufficient resources";
+                break;
+            case EGL_BAD_ATTRIBUTE:
+                LOG_E << "  -> EGL_BAD_ATTRIBUTE: Invalid surface attribute";
+                LOG_E << "     This usually means the native window type is incorrect";
+                break;
+            default:
+                LOG_E << "  -> Unknown EGL error code: 0x" << std::hex << error;
+                break;
+        }
+        
+        return EGL_NO_SURFACE;
+    }
+    
+    LOG_I << "EGL surface created successfully";
+    return surface;
+}
+
+bool EglContext::makeCurrent(EGLSurface surface) {
+    if (!initialized_) {
+        return false;
+    }
+    
+    if (!eglMakeCurrent(display_, surface, surface, context_)) {
+        LOG_E << "Failed to make EGL context current";
+        return false;
+    }
+    
+    return true;
+}
+
+void EglContext::swapBuffers(EGLSurface surface) {
+    if (initialized_ && surface != EGL_NO_SURFACE) {
+        eglSwapBuffers(display_, surface);
+    }
+}
+
+void EglContext::cleanup() {
+    if (context_ != EGL_NO_CONTEXT) {
+        eglDestroyContext(display_, context_);
+        context_ = EGL_NO_CONTEXT;
+    }
+    
+    if (display_ != EGL_NO_DISPLAY) {
+        eglTerminate(display_);
+        display_ = EGL_NO_DISPLAY;
+    }
+    
+    initialized_ = false;
+    LOG_I << "EGL cleaned up";
+}
 
 } // namespace Component

@@ -62,7 +62,7 @@ renderui/
 ├── window/                  # 窗口管理
 │   ├── WindowManager.cpp    # 窗口创建与管理
 │   ├── Window.cpp           # 窗口对象
-│   ├── Surface.cpp          # Wayland Surface
+│   ├── WaylandSurface.cpp          # Wayland WaylandSurface
 │   └── EglContext.cpp       # OpenGL 上下文
 │
 ├── widget/                  # 控件系统
@@ -75,8 +75,7 @@ renderui/
 │   │   ├── VideoStream.cpp
 │   │   └── Model3D.cpp
 │   └── events/              # 事件处理
-│       ├── TouchEvent.cpp
-│       └── KeyEvent.cpp
+│       └── TouchEvent.cpp
 │
 ├── layout/                  # 布局引擎
 │   ├── LayoutEngine.cpp     # 布局计算
@@ -101,8 +100,7 @@ renderui/
 │   └── Settings.cpp         # 设置管理
 │
 ├── ipc/                     # IPC 通信
-│   ├──DBusAdapter.cpp      # DBus 适配层
-│   └── CanSignal.cpp        # CAN 信号解析
+│   └──DBusAdapter.cpp      # DBus 适配层
 │
 └── utils/                   # 工具库
     ├── JsonParser.cpp       # JSON 解析
@@ -126,12 +124,11 @@ public:
     virtual void setVisible(bool visible);
     
     // 渲染接口
-    virtual bool needsRender() const;  // 是否需要渲染
-    virtual void render(RenderContext& ctx);  // 渲染实现
+    virtual bool isDirty() const;  // 是否需要渲染
+    virtual void render(CairoGlRenderer& ctx);  // 渲染实现
     
     // 事件处理
     virtual bool handleTouchEvent(const TouchEvent& event);
-    virtual bool handleKeyEvent(const KeyEvent& event);
     
     // 树形结构
     void addChild(std::shared_ptr<Widget> child);
@@ -164,7 +161,7 @@ public:
     void pushFrame(const VideoFrame& frame);
     
     // 视频流始终需要渲染
-    bool needsRender() const override { return true; }
+    bool isDirty() const override { return true; }
     
     // YUV→RGB 转换 + OpenGL 纹理上传
     void onDraw(Canvas& canvas) override;
@@ -179,10 +176,10 @@ private:
 };
 ```
 
-#### 2.2.3 RenderContext 渲染上下文
+#### 2.2.3 CairoGlRenderer 渲染上下文
 
 ```cpp
-class RenderContext {
+class CairoGlRenderer {
 public:
     // 获取 Cairo 绘图表面（阶段一、二）
     cairo_t* getCairoContext();
@@ -401,36 +398,40 @@ void VideoStream::uploadYuvTexture(const VideoFrame& frame) {
 }
 ```
 
-### 5.3 DBus 信号处理
+### 5.3 DBus 调试接口
 
 ```cpp
-class CanSignalAdapter {
+class DBusAdapter {
 public:
     void init() {
         // 连接 DBus
         conn_ = g_bus_get_sync(G_BUS_TYPE_SYSTEM, nullptr, nullptr);
         
-        // 订阅 CAN 信号
-        g_dbus_connection_signal_subscribe(
+        // 导出对象供调试工具调用
+        g_dbus_connection_register_object(
             conn_,
-            "com.vehicle.can",           // bus name
-            "com.vehicle.can.Signal",    // interface
-            "SpeedUpdate",               // member
-            "/com/vehicle/can/speed",    // path
-            nullptr,
-            G_DBUS_SIGNAL_FLAGS_NONE,
-            onCanSignalReceived,
+            "/com/renderui/debug",
+            interface_info,
+            &vtable,
             this,
+            nullptr,
             nullptr
         );
     }
     
 private:
-    static void onCanSignalReceived(...) {
-        // 解析信号值
-        auto speed = g_variant_get_int32(parameters);
-        
-        // 通知 UI 层更新
+    static void onMethodCall(...) {
+        // 处理调试方法调用
+        // 例如：截图、日志导出、性能数据等
+    }
+};
+```
+
+**DBus 用途:**
+- 调试工具集成
+- 日志导出
+- 远程截图
+- 性能数据监控
         ApplicationContext::instance()->postEvent(
             SignalEvent{"vehicle.speed", std::to_string(speed)}
         );
@@ -489,7 +490,7 @@ public:
             lastTime_ = now;
             
             // 记录日志
-            LOG_INFO("FPS: {}", fps_);
+            LOG_I << "FPS: {}" << fps_;
         }
     }
     
@@ -529,7 +530,7 @@ private:
 ```cpp
 #define TRACE_EVENT(name) perfetto::TrackEvent::ScopedInstant(name)
 
-void Widget::render(RenderContext& ctx) {
+void Widget::render(CairoGlRenderer& ctx) {
     TRACE_EVENT("Widget::render");
     // ... 渲染代码
 }

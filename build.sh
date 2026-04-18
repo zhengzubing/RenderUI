@@ -11,6 +11,7 @@ BUILD_TYPE="Release"
 CMAKE_EXTRA_ARGS=""
 
 # 解析参数
+BUILD_OFFLINE=OFF
 while [[ $# -gt 0 ]]; do
     case $1 in
         --debug)
@@ -25,6 +26,12 @@ while [[ $# -gt 0 ]]; do
             CMAKE_EXTRA_ARGS+=" -DENABLE_PERFETTO=ON"
             shift
             ;;
+        --offline)
+            BUILD_OFFLINE=ON
+            CMAKE_EXTRA_ARGS+=" -DFETCHCONTENT_FULLY_DISCONNECTED=ON"
+            echo "Offline mode enabled (using cached dependencies)"
+            shift
+            ;;
         --clean)
             rm -rf "${BUILD_DIR}"
             echo "Build directory cleaned"
@@ -37,8 +44,12 @@ while [[ $# -gt 0 ]]; do
             echo "  --debug      Build in Debug mode (default: Release)"
             echo "  --skia       Enable Skia GPU acceleration (Stage 4+)"
             echo "  --perfetto   Enable Perfetto tracing"
+            echo "  --offline    Offline mode - use cached dependencies only"
             echo "  --clean      Clean build directory"
             echo "  --help       Show this help message"
+            echo ""
+            echo "Note: First build requires internet connection to download dependencies."
+            echo "      Subsequent builds can use --offline if dependencies are cached."
             exit 0
             ;;
         *)
@@ -105,8 +116,28 @@ build() {
     echo "=========================================="
     echo "Build Type: ${BUILD_TYPE}"
     echo "Build Dir:  ${BUILD_DIR}"
+    echo "Offline:    ${BUILD_OFFLINE}"
     echo "Extra Args: ${CMAKE_EXTRA_ARGS:-none}"
     echo ""
+    
+    # 离线模式检查
+    if [ "${BUILD_OFFLINE}" = "ON" ]; then
+        if [ ! -d "${BUILD_DIR}/_deps" ]; then
+            echo "⚠️  Warning: No cached dependencies found in build directory!"
+            echo "   Offline mode requires a previous successful build to cache dependencies."
+            echo ""
+            echo "   Please run one of the following first:"
+            echo "   1. ./build.sh              (normal build with internet)"
+            echo "   2. ./build.sh --clean      (then rebuild with internet)"
+            echo ""
+            echo "   Or disable offline mode:"
+            echo "   ./build.sh [other options]"
+            echo ""
+            exit 1
+        fi
+        echo "✓ Using cached dependencies from ${BUILD_DIR}/_deps"
+        echo ""
+    fi
     
     mkdir -p "${BUILD_DIR}"
     cd "${BUILD_DIR}"
@@ -131,7 +162,7 @@ build() {
     echo "Libraries location: ${BUILD_DIR}/lib/"
     echo ""
     echo "To run examples:"
-    echo "  cd ${BUILD_DIR}/bin && ./renderui_demo"
+    echo "  cd ${BUILD_DIR}/bin && ./ui_demo"
     echo ""
 }
 

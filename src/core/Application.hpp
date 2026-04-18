@@ -1,10 +1,13 @@
 #pragma once
 
+#include "CairoGlRenderer.hpp"
 #include <memory>
 #include <string>
 
 namespace Component {
 
+class Window;
+class WidgetTree;
 /**
  * @brief 应用入口与主循环管理
  * 
@@ -42,11 +45,21 @@ public:
      */
     void shutdown();
     
-private:
-    Application() = default;
+    /**
+     * @brief 获取控件树（用于添加/管理控件）
+     * @return WidgetTree 引用
+     */
+    WidgetTree& getWidgetTree();
     
-    struct Impl;
-    std::unique_ptr<Impl> impl_;
+private:
+    bool running_ = false;
+    std::string title_;
+    int width_ = 0;
+    int height_ = 0;
+    
+    Window* window_ = nullptr;
+    CairoGlRenderer renderContext_;
+    std::unique_ptr<WidgetTree> widgetTree_;
     
 public:
     // 允许 shared_ptr 正确销毁对象

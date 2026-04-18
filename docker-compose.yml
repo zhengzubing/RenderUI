@@ -12,7 +12,7 @@ services:
       # 缓存 CMake 和 FetchContent 下载
       - cmake-cache:/root/.cache
     working_dir: /workspace/RenderUI
-    command: /bin/bash
+    command: tail -f /dev/null
     # 如果需要 GUI 支持，取消下面的注释
     # network_mode: host
     # environment:

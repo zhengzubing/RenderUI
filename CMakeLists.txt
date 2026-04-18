@@ -1,4 +1,14 @@
 cmake_minimum_required(VERSION 3.20)
+
+# 设置 CMake 策略以兼容旧版本依赖
+if(POLICY CMP0048)
+    cmake_policy(SET CMP0048 NEW)
+endif()
+if(POLICY CMP0077)
+    cmake_policy(SET CMP0077 NEW)
+endif()
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+
 project(RenderUI 
     VERSION 0.1.0 
     DESCRIPTION "Modern UI Widget Rendering Framework"
@@ -63,8 +73,11 @@ FetchContent_MakeAvailable(tinyobjloader)
 FetchContent_Declare(
     tinyply
     GIT_REPOSITORY https://github.com/ddiakopoulos/tinyply.git
-    GIT_TAG        2.3.4
+    GIT_TAG        3.0
 )
+set(BUILD_TINYPLOY_TESTS OFF CACHE BOOL "Build tinyply tests" FORCE)
+# 全局禁用 doctest 的 POSIX 信号处理（兼容新版 glibc）
+add_compile_definitions(DOCTEST_CONFIG_NO_POSIX_SIGNALS)
 FetchContent_MakeAvailable(tinyply)
 
 # 6. stb_image - 图像加载
@@ -99,7 +112,44 @@ pkg_check_modules(CAIRO REQUIRED cairo)
 pkg_check_modules(WAYLAND REQUIRED 
     wayland-client
     wayland-protocols
+    wayland-egl
 )
+
+# 生成 Wayland XDG Shell 协议头文件
+find_program(WAYLAND_SCANNER wayland-scanner REQUIRED)
+execute_process(
+    COMMAND pkg-config --variable=pkgdatadir wayland-protocols
+    OUTPUT_VARIABLE WAYLAND_PROTOCOLS_DATADIR
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE PKGCONFIG_RESULT
+)
+if(PKGCONFIG_RESULT EQUAL 0 AND EXISTS "${WAYLAND_PROTOCOLS_DATADIR}/stable/xdg-shell/xdg-shell.xml")
+    # 新版 wayland-protocols (1.15+) 使用 stable/xdg-shell/xdg-shell.xml
+    set(XDG_SHELL_XML ${WAYLAND_PROTOCOLS_DATADIR}/stable/xdg-shell/xdg-shell.xml)
+elseif(EXISTS "${WAYLAND_PROTOCOLS_DATADIR}/wayland/xdg-shell.xml")
+    # 旧版路径
+    set(XDG_SHELL_XML ${WAYLAND_PROTOCOLS_DATADIR}/wayland/xdg-shell.xml)
+else()
+    message(FATAL_ERROR "Could not find xdg-shell.xml in wayland-protocols datadir: ${WAYLAND_PROTOCOLS_DATADIR}")
+endif()
+set(XDG_SHELL_HEADER ${CMAKE_CURRENT_BINARY_DIR}/xdg-shell-client-protocol.h)
+set(XDG_SHELL_CODE ${CMAKE_CURRENT_BINARY_DIR}/xdg-shell-protocol.c)
+
+add_custom_command(
+    OUTPUT ${XDG_SHELL_HEADER}
+    COMMAND ${WAYLAND_SCANNER} client-header ${XDG_SHELL_XML} ${XDG_SHELL_HEADER}
+    DEPENDS ${XDG_SHELL_XML}
+    COMMENT "Generating XDG Shell header"
+)
+
+add_custom_command(
+    OUTPUT ${XDG_SHELL_CODE}
+    COMMAND ${WAYLAND_SCANNER} private-code ${XDG_SHELL_XML} ${XDG_SHELL_CODE}
+    DEPENDS ${XDG_SHELL_XML}
+    COMMENT "Generating XDG Shell code"
+)
+
+add_custom_target(wayland_protocols DEPENDS ${XDG_SHELL_HEADER} ${XDG_SHELL_CODE})
 
 # 10. EGL - OpenGL ES 上下文
 pkg_check_modules(EGL REQUIRED egl)
@@ -109,6 +159,8 @@ pkg_check_modules(GLES REQUIRED glesv2)
 
 # 12. DBus - IPC 通信
 pkg_check_modules(DBUS REQUIRED dbus-1)
+# 13. GLib - DBus 依赖
+pkg_check_modules(GLIB REQUIRED glib-2.0)
 
 # ============================================================================
 # 扩展库（阶段四启用）
@@ -138,24 +190,39 @@ endif()
 # 收集所有源文件
 file(GLOB_RECURSE CORE_SOURCES 
     src/core/*.cpp
-    src/window/*.cpp
     src/widget/*.cpp
     src/widget/widgets/*.cpp
-    src/widget/events/*.cpp
     src/layout/*.cpp
     src/render/*.cpp
     src/resource/*.cpp
-    src/data/*.cpp
     src/ipc/*.cpp
     src/utils/*.cpp
 )
 
 # 创建静态库
-add_library(RenderUICore STATIC ${CORE_SOURCES})
+add_library(RenderUICore STATIC ${CORE_SOURCES} ${XDG_SHELL_CODE})
+add_dependencies(RenderUICore wayland_protocols)
+
+# 复制 Shader 文件到构建目录（在构建库之后）
+file(GLOB SHADER_FILES "${CMAKE_SOURCE_DIR}/shaders/*.glsl")
+foreach(SHADER_FILE ${SHADER_FILES})
+    get_filename_component(SHADER_NAME ${SHADER_FILE} NAME)
+    configure_file(${SHADER_FILE} ${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME} COPYONLY)
+endforeach()
+message(STATUS "Shader files will be copied to build directory: ${SHADER_FILES}")
 
 target_include_directories(RenderUICore
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/core>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/widget>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/widget/widgets>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/layout>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/render>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/resource>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/ipc>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/utils>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
         $<INSTALL_INTERFACE:include>
     PRIVATE
         ${CAIRO_INCLUDE_DIRS}
@@ -163,6 +230,7 @@ target_include_directories(RenderUICore
         ${EGL_INCLUDE_DIRS}
         ${GLES_INCLUDE_DIRS}
         ${DBUS_INCLUDE_DIRS}
+        ${GLIB_INCLUDE_DIRS}
 )
 
 target_link_libraries(RenderUICore
@@ -172,13 +240,13 @@ target_link_libraries(RenderUICore
         magic_enum::magic_enum
         tinyobjloader
         tinyply
-        cppsoft_signals
     PRIVATE
         ${CAIRO_LIBRARIES}
         ${WAYLAND_LIBRARIES}
         ${EGL_LIBRARIES}
         ${GLES_LIBRARIES}
         ${DBUS_LIBRARIES}
+        ${GLIB_LIBRARIES}
         dl
         pthread
 )
@@ -206,9 +274,8 @@ target_compile_options(RenderUICore PRIVATE
 # 示例程序
 # ============================================================================
 
-# 暂时禁用示例构建，避免目录不存在错误
-# TODO: 创建示例程序后启用
-set(BUILD_EXAMPLES OFF CACHE BOOL "Build examples" FORCE)
+# 阶段五：启用示例构建
+set(BUILD_EXAMPLES ON CACHE BOOL "Build examples" FORCE)
 
 if(BUILD_EXAMPLES)
     add_subdirectory(examples)
@@ -218,9 +285,8 @@ endif()
 # 测试
 # ============================================================================
 
-# 暂时禁用测试构建，避免 GoogleTest 冲突
-# TODO: 阶段五再启用测试
-set(BUILD_TESTS OFF CACHE BOOL "Build tests" FORCE)
+# 阶段五：启用测试构建
+set(BUILD_TESTS ON CACHE BOOL "Build tests" FORCE)
 
 if(BUILD_TESTS)
     # GoogleTest - 单元测试（阶段五）
@@ -232,7 +298,7 @@ if(BUILD_TESTS)
     FetchContent_Declare(
         googletest
         GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG        v1.14.0
+        GIT_TAG        v1.17.0
     )
     # For Windows: Prevent overriding the parent project's compiler/linker settings
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
