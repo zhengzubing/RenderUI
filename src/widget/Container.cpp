@@ -53,18 +53,29 @@ std::shared_ptr<Widget> Container::Get(const std::string& id) const {
     return (it != childMap_.end()) ? it->second : nullptr;
 }
 
-void Container::render(CairoGlRenderer& ctx) {
+void Container::updateTexture(CairoGlRenderer& ctx) {
     if (!isVisible()) {
         return;
     }
-    
+
     // 渲染容器本身（如果有绘制逻辑）
-    Widget::render(ctx);
-    
-    // 渲染所有子控件
+    Widget::updateTexture(ctx);
+
     for (auto& child : children_) {
         if (child && child->isVisible()) {
-            child->render(ctx);
+            child->updateTexture(ctx);
+        }
+    }
+}
+
+void Container::updateZIndex(CairoGlRenderer& ctx) {
+    // 同步容器本身的 Z 序
+    Widget::updateZIndex(ctx);
+    
+    // 递归同步所有子控件的 Z 序
+    for (auto& child : children_) {
+        if (child) {
+            child->updateZIndex(ctx);
         }
     }
 }

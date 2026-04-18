@@ -73,7 +73,7 @@ public:
     /**
      * @brief 是否需要渲染
      */
-    bool needsRender() const override { return true; }  // 3D 模型每帧渲染
+    bool isDirty() const override { return true; }  // 3D 模型每帧渲染
     
     /**
      * @brief 获取模型数据

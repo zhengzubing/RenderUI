@@ -75,37 +75,61 @@ bool Widget::isVisible() const {
     return visible_;
 }
 
-bool Widget::needsRender() const {
+bool Widget::isDirty() const {
     return dirty_;
 }
 
-void Widget::render(CairoGlRenderer& ctx) {
-    if (!visible_ || !dirty_) {
+void Widget::updateTexture(CairoGlRenderer& ctx) {
+    if (!visible_) {
         return;
     }
-    LOG_I << "Widget render" << getId();
     
-    auto cairo = ctx.getCairoContext();
-    if (cairo) {
-        Canvas canvas(cairo);
-        LOG_I << "Widget onDraw" << getId();
-        onDraw(canvas);
+    // 获取 Widget 的 Cairo 上下文
+    int w = static_cast<int>(width_);
+    int h = static_cast<int>(height_);
+    
+    if (w <= 0 || h <= 0) {
+        return;
     }
+    
+    auto cairo = ctx.getCairoContext(id_, w, h);
+    if (!cairo) {
+        LOG_E << "Failed to get widget context: " << id_;
+        return;
+    }
+    
+    // 更新位置信息（无论是否需要重绘都要更新）
+    ctx.updateWidgetPosition(id_, x_, y_, static_cast<float>(w), static_cast<float>(h));
+    
+    // 如果不需要重绘，直接返回
+    if (!dirty_) {
+        return;
+    }
+    
+    LOG_D << "Widget render: " << id_ << " at (" << x_ << ", " << y_ << ") size: " << w << "x" << h;
+    
+    // 清除画布
+    cairo_save(cairo);
+    cairo_set_operator(cairo, CAIRO_OPERATOR_CLEAR);
+    cairo_paint(cairo);
+    cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
+    cairo_restore(cairo);
+    
+    // 创建 Canvas 并绘制
+    Canvas canvas(cairo);
+    onDraw(canvas);
+    
+    // 标记为已渲染
     dirty_ = false;
+    
+    // 标记纹理需要更新
+    ctx.markWidgetDirty(id_);
 }
 
-// void Widget::addChild(std::shared_ptr<Widget> child) {
-//     if (child) {
-//         children_.push_back(child);
-//         child->parent_ = shared_from_this(); // 需要在外部设置 parent
-//     }
-// }
-
-// void Widget::removeChild(const std::string& id) {
-//     std::erase_if(children_, [&id](const auto& child) {
-//         return child->getId() == id;
-//     });
-// }
+void Widget::updateZIndex(CairoGlRenderer& ctx) {
+    // 同步 Z 序到渲染器
+    ctx.updateWidgetZIndex(id_, zIndex_);
+}
 
 std::shared_ptr<Widget> Widget::getParent() const {
     return parent_.lock();
@@ -124,7 +148,11 @@ int Widget::getZIndex() const {
 }
 
 void Widget::setZIndex(int zIndex) {
-    zIndex_ = zIndex;
+    if (zIndex_ != zIndex) {
+        zIndex_ = zIndex;
+        markDirty();  // zIndex 变化需要重绘
+        LOG_D << "Widget zIndex changed: " << id_ << " -> " << zIndex;
+    }
 }
 
 bool Widget::handleTouchEvent(const TouchEvent& event) {

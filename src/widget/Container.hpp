@@ -52,11 +52,16 @@ public:
      * @brief 获取所有子控件
      */
     const std::vector<std::shared_ptr<Widget>>& GetChildren() const { return children_; }
+
+    /**
+     * @brief 同步 Z 序到渲染器
+     */
+    void updateZIndex(CairoGlRenderer& ctx) override;
     
     /**
      * @brief 渲染容器及所有子控件
      */
-    void render(CairoGlRenderer& ctx) override;
+    void updateTexture(CairoGlRenderer& ctx) override;
     
     /**
      * @brief 处理触摸事件

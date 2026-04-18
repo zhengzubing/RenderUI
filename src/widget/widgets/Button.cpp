@@ -43,7 +43,7 @@ void Button::setCornerRadius(float radius) {
 }
 
 void Button::onDraw(Canvas& canvas) {
-    auto pos = getPosition();
+    auto pos  = Vec2{0.0f, 0.0f};
     auto size = getSize();
 
     LOG_I << "Button onDraw" << pos.x << "," << pos.y << " " << size.width << "," << size.height;

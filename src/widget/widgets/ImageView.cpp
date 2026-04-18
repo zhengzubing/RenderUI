@@ -60,11 +60,65 @@ void ImageView::onDraw(Canvas& canvas) {
         return;
     }
     
-    auto pos = getPosition();
     auto size = getSize();
     
-    // 绘制图片
-    canvas.drawImage(pos.x, pos.y, size.width, size.height, surface);
+    // 根据缩放模式计算实际绘制尺寸
+    float drawWidth = size.width;
+    float drawHeight = size.height;
+    
+    if (imageWidth_ > 0 && imageHeight_ > 0) {
+        float imgAspect = static_cast<float>(imageWidth_) / static_cast<float>(imageHeight_);
+        float widgetAspect = size.width / size.height;
+        
+        switch (scaleMode_) {
+            case ScaleMode::None:
+                // 原始大小
+                drawWidth = static_cast<float>(imageWidth_);
+                drawHeight = static_cast<float>(imageHeight_);
+                break;
+                
+            case ScaleMode::FitWidth:
+                // 适应宽度，高度按比例缩放
+                drawWidth = size.width;
+                drawHeight = size.width / imgAspect;
+                break;
+                
+            case ScaleMode::FitHeight:
+                // 适应高度，宽度按比例缩放
+                drawHeight = size.height;
+                drawWidth = size.height * imgAspect;
+                break;
+                
+            case ScaleMode::FitBoth:
+                // 适应两边（保持比例，letterbox 模式）
+                if (keepAspectRatio_) {
+                    if (widgetAspect > imgAspect) {
+                        // 控件更宽，以高度为准
+                        drawHeight = size.height;
+                        drawWidth = size.height * imgAspect;
+                    } else {
+                        // 控件更高，以宽度为准
+                        drawWidth = size.width;
+                        drawHeight = size.width / imgAspect;
+                    }
+                } else {
+                    // 不保持比例，直接填充
+                    drawWidth = size.width;
+                    drawHeight = size.height;
+                }
+                break;
+                
+            case ScaleMode::Fill:
+                // 填充整个控件（可能变形）
+                drawWidth = size.width;
+                drawHeight = size.height;
+                break;
+        }
+    }
+    
+    // Cairo 只在 (0, 0) 位置绘制，位置由 OpenGL 变换处理
+    LOG_I << "ImageView drawImage: size(" << drawWidth << ", " << drawHeight << ")";
+    canvas.drawImage(0, 0, drawWidth, drawHeight, surface);
 }
 
 void ImageView::fromJson(const json& config) {

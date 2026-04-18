@@ -53,7 +53,7 @@ void Label::onDraw(Canvas& canvas) {
         return;
     }
     
-    auto pos = getPosition();
+    auto pos = Vec2{0.0f, 0.0f};
     canvas.drawText(pos.x, pos.y + fontSize_, text_.c_str(), 
                     fontFamily_.c_str(), fontSize_, textColor_);
 }

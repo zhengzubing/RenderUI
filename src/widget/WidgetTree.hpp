@@ -7,6 +7,8 @@
 #include <string>
 #include <map>
 #include <functional>
+#include <iostream>
+#include <sstream>
 
 namespace Component {
 
@@ -19,7 +21,36 @@ struct WidgetNode {
     std::vector<std::shared_ptr<WidgetNode>> children;
     
     std::string id;
-    int zIndex = 0;
+    int originalIndex = 0;
+    
+    /**
+     * @brief 获取节点的字符串描述
+     */
+    std::string toString() const {
+        std::ostringstream oss;
+        oss << "WidgetNode[" << id << "]";
+        
+        if (widget) {
+            oss << " Type=" << widget->getId();
+            oss << " Pos=(" << widget->getX() << "," << widget->getY() << ")";
+            oss << " Size=" << widget->getWidth() << "x" << widget->getHeight();
+            oss << " Visible=" << (widget->isVisible() ? "Y" : "N");
+        } else {
+            oss << " [NULL WIDGET]";
+        }
+        
+        oss << " Children=" << children.size();
+        
+        return oss.str();
+    }
+    
+    /**
+     * @brief 流输出运算符（友元函数）
+     */
+    friend std::ostream& operator<<(std::ostream& os, const WidgetNode& node) {
+        os << node.toString();
+        return os;
+    }
 };
 
 /**
@@ -70,7 +101,7 @@ public:
     /**
      * @brief 渲染所有需要渲染的控件
      */
-    void render(CairoGlRenderer& ctx);
+    void updateTree(CairoGlRenderer& ctx);
     
     /**
      * @brief 标记所有控件为脏
@@ -87,7 +118,7 @@ private:
     std::map<std::string, std::shared_ptr<WidgetNode>> widgetMap_;
     
     std::shared_ptr<WidgetNode> findNode(const std::string& id);
-    bool renderNode(CairoGlRenderer& ctx, const std::shared_ptr<WidgetNode>& node);
+    void updateNode(CairoGlRenderer& ctx, const std::shared_ptr<WidgetNode>& node);
     std::shared_ptr<Widget> findWidgetAtInNode(const std::shared_ptr<WidgetNode>& node, float x, float y);
     void markNodeDirty(const std::shared_ptr<WidgetNode>& node);
 };

@@ -18,7 +18,7 @@ void WidgetTree::addRoot(std::shared_ptr<Widget> widget, const std::string& id) 
     auto node = std::make_shared<WidgetNode>();
     node->widget = widget;
     node->id = id;
-    node->zIndex = 0;
+    node->originalIndex = roots_.size();
     
     widget->setId(id);
     
@@ -45,7 +45,7 @@ void WidgetTree::addChild(const std::string& parentId, std::shared_ptr<Widget> w
     childNode->widget = widget;
     childNode->id = childId;
     childNode->parent = parentNode;
-    childNode->zIndex = parentNode->children.size();
+    childNode->originalIndex = parentNode->children.size();
     
     widget->setId(childId);
     
@@ -84,7 +84,7 @@ void WidgetTree::addToContainer(const std::string& containerId,
     widgetNode->widget = widget;
     widgetNode->id = widgetId;
     widgetNode->parent = containerNode;
-    widgetNode->zIndex = containerNode->children.size();
+    widgetNode->originalIndex = containerNode->children.size();
     
     containerNode->children.push_back(widgetNode);
     widgetMap_[widgetId] = widgetNode;
@@ -146,15 +146,10 @@ void WidgetTree::updateLayout(int screenWidth, int screenHeight) {
     // LOG_D << "Layout updated: " << screenWidth << "x" << screenHeight;
 }
 
-void WidgetTree::render(CairoGlRenderer& ctx) {
-    // 按 Z 序排序
-    std::vector<std::shared_ptr<WidgetNode>> sortedRoots = roots_;
-    std::sort(sortedRoots.begin(), sortedRoots.end(),
-        [](const auto& a, const auto& b) { return a->zIndex < b->zIndex; });
-    
+void WidgetTree::updateTree(CairoGlRenderer& ctx) {
     // 渲染所有根节点
-    for (auto& root : sortedRoots) {
-        renderNode(ctx, root);
+    for (auto& root : roots_) {
+        updateNode(ctx, root);
     }
 }
 
@@ -165,6 +160,7 @@ void WidgetTree::markAllDirty() {
     LOG_D << "All widgets marked dirty";
 }
 
+
 std::shared_ptr<WidgetNode> WidgetTree::findNode(const std::string& id) {
     auto it = widgetMap_.find(id);
     if (it != widgetMap_.end()) {
@@ -173,27 +169,31 @@ std::shared_ptr<WidgetNode> WidgetTree::findNode(const std::string& id) {
     return nullptr;
 }
 
-bool WidgetTree::renderNode(CairoGlRenderer& ctx, const std::shared_ptr<WidgetNode>& node) {
+void WidgetTree::updateNode(CairoGlRenderer& ctx, const std::shared_ptr<WidgetNode>& node) {
     if (!node || !node->widget) {
-        return false;
+        return;
     }
     
     auto& widget = node->widget;
+    LOG_I << "Updating widget: " << widget->getId() << " (zIndex=" << widget->getZIndex() << ")";
     
-    // 渲染当前控件
-    if (widget->isVisible() && widget->needsRender()) {
-        LOG_D << "Rendering widget: " 
-              << " at (" << widget->getX() << ", " << widget->getY() 
-              << ") size: " << widget->getWidth() << "x" << widget->getHeight();
-        widget->render(ctx);
+    // 更新当前控件
+    if (widget->isVisible()) {
+        LOG_I << "Updating widget: " << widget->getId() << " (zIndex=" << widget->getZIndex() << ")";
+        
+        // 更新 Widget 纹理（内部会调用 updateWidgetPosition）
+        if (widget->isDirty()) {
+            widget->updateTexture(ctx);
+        }
+        
+        // 同步 Z 序到渲染器
+        widget->updateZIndex(ctx);
     }
     
-    // 递归渲染子节点
+    // 递归更新子节点（保持原有顺序）
     for (auto& child : node->children) {
-        renderNode(ctx, child);
+        updateNode(ctx, child);
     }
-    
-    return true;
 }
 
 std::shared_ptr<Widget> WidgetTree::findWidgetAtInNode(

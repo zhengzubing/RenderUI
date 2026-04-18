@@ -124,7 +124,7 @@ public:
     virtual void setVisible(bool visible);
     
     // 渲染接口
-    virtual bool needsRender() const;  // 是否需要渲染
+    virtual bool isDirty() const;  // 是否需要渲染
     virtual void render(CairoGlRenderer& ctx);  // 渲染实现
     
     // 事件处理
@@ -161,7 +161,7 @@ public:
     void pushFrame(const VideoFrame& frame);
     
     // 视频流始终需要渲染
-    bool needsRender() const override { return true; }
+    bool isDirty() const override { return true; }
     
     // YUV→RGB 转换 + OpenGL 纹理上传
     void onDraw(Canvas& canvas) override;

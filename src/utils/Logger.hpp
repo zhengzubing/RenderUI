@@ -66,54 +66,9 @@ private:
 #undef LOG_V
 #endif
 
-class LogStream {
-public:
-    LogStream(plog::Severity severity, const char* file, int line) 
-        : severity_(severity), file_(file), line_(line) {}
-    
-    ~LogStream() {
-        // 构建带文件信息的消息
-        std::string fullMessage = stream_.str();
-        std::string locationInfo = std::string(file_) + ":" + std::to_string(line_);
-        
-        switch (severity_) {
-            case plog::debug:
-                PLOG_DEBUG << "[" << locationInfo << "] " << fullMessage;
-                break;
-            case plog::info:
-                std::cout << "[" << locationInfo << "] " << fullMessage << std::endl;
-                PLOG_INFO << "[" << locationInfo << "] " << fullMessage;
-                break;
-            case plog::warning:
-                PLOG_WARNING << "[" << locationInfo << "] " << fullMessage;
-                break;
-            case plog::error:
-                PLOG_ERROR << "[" << locationInfo << "] " << fullMessage;
-                break;
-            case plog::verbose:
-                PLOG_VERBOSE << "[" << locationInfo << "] " << fullMessage;
-                break;
-            default:
-                break;
-        }
-    }
-    
-    template<typename T>
-    LogStream& operator<<(const T& value) {
-        stream_ << value;
-        return *this;
-    }
-    
-private:
-    plog::Severity severity_;
-    const char* file_;
-    int line_;
-    std::ostringstream stream_;
-};
-
 // 重新定义日志宏
-#define LOG_D LogStream(plog::debug, __FILE__, __LINE__)
-#define LOG_I LogStream(plog::info, __FILE__, __LINE__)
-#define LOG_W LogStream(plog::warning, __FILE__, __LINE__)
-#define LOG_E LogStream(plog::error, __FILE__, __LINE__)
-#define LOG_V LogStream(plog::verbose, __FILE__, __LINE__)
+#define LOG_D PLOG_DEBUG
+#define LOG_I PLOG_INFO
+#define LOG_W PLOG_WARNING
+#define LOG_E PLOG_ERROR
+#define LOG_V PLOG_VERBOSE

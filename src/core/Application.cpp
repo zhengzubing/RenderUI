@@ -24,13 +24,13 @@ bool Application::init(const std::string& title, int width, int height) {
     height_ = height;
     
     // 初始化日志系统
-    Logger::instance().init(plog::debug, "renderui.log");
+    Logger::instance().init(plog::debug, "/home/parallels/RenderUI/renderui.log");
     
     // 初始化应用上下文
     ApplicationContext::instance().init();
     
     // 初始化资源管理器
-    ResourceManager::instance().init("./assets");
+    ResourceManager::instance().init("/home/parallels/RenderUI/assets/");
     
     // 初始化调试菜单
     DebugMenu::instance().init();
@@ -93,7 +93,7 @@ int Application::run() {
         
         // 自动渲染控件树（类似 Qt 的自动渲染）
         if (widgetTree_) {
-            widgetTree_->render(renderContext_);
+            widgetTree_->updateTree(renderContext_);
         } else {
             LOG_W << "Widget tree is null!";
         }

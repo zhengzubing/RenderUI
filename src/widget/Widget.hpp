@@ -98,22 +98,17 @@ public:
     /**
      * @brief 是否需要渲染
      */
-    virtual bool needsRender() const;
+    virtual bool isDirty() const;
     
     /**
      * @brief 渲染控件
      */
-    virtual void render(CairoGlRenderer& ctx);
+    virtual void updateTexture(CairoGlRenderer& ctx);
     
-    // /**
-    //  * @brief 添加子控件
-    //  */
-    // void addChild(std::shared_ptr<Widget> child);
-    
-    // /**
-    //  * @brief 移除子控件
-    //  */
-    // void removeChild(const std::string& id);
+    /**
+     * @brief 同步 Z 序到渲染器
+     */
+    virtual void updateZIndex(CairoGlRenderer& ctx);
     
     /**
      * @brief 获取父控件

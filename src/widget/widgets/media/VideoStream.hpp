@@ -66,7 +66,7 @@ public:
     /**
      * @brief 是否需要渲染（视频流始终需要渲染）
      */
-    bool needsRender() const override { return hasNewFrame_; }
+    bool isDirty() const override { return hasNewFrame_; }
     
     /**
      * @brief 开始视频流
