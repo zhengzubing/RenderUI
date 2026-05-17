@@ -189,6 +189,11 @@ public:
     void drawRoundedRect(float x, float y, float width, float height, float radius, const Color& color);
     
     /**
+     * @brief 清空画布
+     */
+    void clear();
+    
+    /**
      * @brief 获取底层 Cairo 上下文
      */
     cairo_t* getCairoContext() const { return cr_; }

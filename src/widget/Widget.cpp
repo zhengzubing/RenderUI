@@ -108,15 +108,11 @@ void Widget::updateTexture(CairoGlRenderer& ctx) {
     
     LOG_D << "Widget render: " << id_ << " at (" << x_ << ", " << y_ << ") size: " << w << "x" << h;
     
-    // 清除画布
-    cairo_save(cairo);
-    cairo_set_operator(cairo, CAIRO_OPERATOR_CLEAR);
-    cairo_paint(cairo);
-    cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
-    cairo_restore(cairo);
-    
-    // 创建 Canvas 并绘制
+    // 创建 Canvas 并清除画布
     Canvas canvas(cairo);
+    canvas.clear();
+    
+    // 绘制控件内容
     onDraw(canvas);
     
     // 标记为已渲染

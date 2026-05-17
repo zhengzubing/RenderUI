@@ -30,6 +30,17 @@ static const wl_registry_listener registryListener = {
     .global_remove = registryGlobalRemove
 };
 
+// wm_base ping 事件处理（GNOME Shell 检测应用响应的关键）
+static void wmBasePing(void* data, xdg_wm_base* wmBase, uint32_t serial) {
+    // 必须回应 pong，否则会被标记为无响应
+    xdg_wm_base_pong(wmBase, serial);
+    LOG_D << "Responded to wm_base ping (serial: " << serial << ")";
+}
+
+static const xdg_wm_base_listener wmBaseListener = {
+    .ping = wmBasePing
+};
+
 Window::Window() = default;
 
 Window::~Window() {
@@ -60,6 +71,11 @@ bool Window::create(const std::string& title, int width, int height) {
         cleanup();
         return false;
     }
+
+    // 添加 wm_base 监听器以处理 ping 事件
+    // 必须在创建 surface 之前添加，确保能及时处理 ping 事件
+    xdg_wm_base_add_listener(wmBase_, &wmBaseListener, this);
+    LOG_I << "wm_base listener registered for ping events";
     
     // 创建 WaylandSurface
     if (!surface_.create(compositor_, wmBase_)) {

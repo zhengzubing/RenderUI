@@ -483,4 +483,13 @@ void Canvas::drawRoundedRect(float x, float y, float width, float height, float 
     cairo_fill(cr_);
 }
 
+void Canvas::clear() {
+    if (!cr_) return;
+    
+    cairo_save(cr_);
+    cairo_set_operator(cr_, CAIRO_OPERATOR_CLEAR);
+    cairo_paint(cr_);
+    cairo_restore(cr_);
+}
+
 } // namespace Component
